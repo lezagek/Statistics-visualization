@@ -33,7 +33,7 @@ class TestQualityAssessment(tk.Toplevel):
         info_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
         info_frame.grid(row=1, column=1, sticky='en', padx=10)
 
-        tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА \nШТЗ - ШАБЛОН ТЕСТОВОГО ЗАДАНИЯ', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
+        tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
 
         what_to_analyze_label = tk.Label(choice_frame, text='Что анализировать')
         what_to_analyze_label.grid(row=0, column=0, sticky='w')
@@ -43,7 +43,7 @@ class TestQualityAssessment(tk.Toplevel):
         analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_analyze, width=30, values=analyze_values)
         analyze_combobox.grid(row=1, column=0, sticky='w')
 
-        number_to_analyze_label = tk.Label(choice_frame, text='Какой СТ/ШТ/ШТЗ анализировать')
+        number_to_analyze_label = tk.Label(choice_frame, text='Какой СТ/ШТ анализировать')
         number_to_analyze_label.grid(row=2, column=0, sticky='w')
 
         cur_number_analyze = tk.StringVar()
