@@ -6,6 +6,7 @@ cursor = conn.cursor()
 
 cursor.executescript(
     '''
+        DROP TABLE IF EXISTS teacher;
         CREATE TABLE teacher (
             teacher_id INTEGER PRIMARY KEY AUTOINCREMENT,
             teacher_name VARCHAR(50),
@@ -21,6 +22,7 @@ cursor.executescript(
             ('Симаков Валентин Константинович', 'simakov.vk', 'dddd');
 
 
+        DROP TABLE IF EXISTS student_group;
         CREATE TABLE student_group (
             group_id INTEGER PRIMARY KEY AUTOINCREMENT,
             group_name CHAR(15) UNIQUE,
@@ -35,6 +37,7 @@ cursor.executescript(
             ('Б9123-09.03.04','прогин');
 
 
+        DROP TABLE IF EXISTS education_year;
         CREATE TABLE education_year (
             education_year_id INTEGER PRIMARY KEY,
             teacher_id INTEGER,
@@ -50,6 +53,7 @@ cursor.executescript(
             (2, 2);
 
 
+        DROP TABLE IF EXISTS subgroup;
         CREATE TABLE subgroup (
             subgroup_id INTEGER PRIMARY KEY AUTOINCREMENT,
             group_id INTEGER,
@@ -72,6 +76,7 @@ cursor.executescript(
             (4,2,2);
 
 
+        DROP TABLE IF EXISTS student;
         CREATE TABLE student (
             student_id INTEGER PRIMARY KEY,
             student_name VARCHAR(50),
@@ -105,6 +110,7 @@ cursor.executescript(
             ('Широкова Софья Сергеевна',8,'shirokova.ss','tttt');
 
 
+        DROP TABLE IF EXISTS key_template;
         CREATE TABLE key_template (
             key_template_id INTEGER PRIMARY KEY,
             key_template_name VARCHAR(10)
@@ -116,6 +122,7 @@ cursor.executescript(
             ('Строковый');
 
 
+        DROP TABLE IF EXISTS tree_type;
         CREATE TABLE tree_type (
             tree_type_id INTEGER PRIMARY KEY,
             tree_type_name CHAR(3)
@@ -127,6 +134,7 @@ cursor.executescript(
             ('АВЛ');
 
 
+        DROP TABLE IF EXISTS tree_template;
         CREATE TABLE tree_template (
             tree_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
             tree_type_id INTEGER,
@@ -143,9 +151,13 @@ cursor.executescript(
         );
 
 
+        DROP TABLE IF EXISTS input_template;
         CREATE TABLE input_template (
             input_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            is_tree INTEGER
+            is_tree INTEGER,
+            key_template_id INTEGER,
+
+            FOREIGN KEY (key_template_id) REFERENCES key_template(key_template_id) ON DELETE CASCADE
         );
 
         INSERT INTO input_template(is_tree) 
@@ -154,11 +166,14 @@ cursor.executescript(
             (1);
 
 
+        DROP TABLE IF EXISTS output_template;
         CREATE TABLE output_template (
-            output_template INTEGER PRIMARY KEY AUTOINCREMENT,
-            is_tree INTEGER
-        );
+            output_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            is_tree INTEGER,
+            key_template_id INTEGER,
 
+            FOREIGN KEY (key_template_id) REFERENCES key_template(key_template_id) ON DELETE CASCADE
+        );
 
         INSERT INTO output_template(is_tree) 
         VALUES 
@@ -166,17 +181,18 @@ cursor.executescript(
             (1);
 
 
+        DROP TABLE IF EXISTS suboperation_template;
         CREATE TABLE suboperation_template (
             suboperation_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
             input_template_id INTEGER,
             output_template_id INTEGER,
             suboperation_template_difficulty FLOAT,
+            suboperation_template_score FLOAT,
             suboperation_text VARCHAR(80),
 
             FOREIGN KEY (input_template_id) REFERENCES input_template(input_template_id) ON DELETE CASCADE,
             FOREIGN KEY (output_template_id) REFERENCES output_template(output_template_id) ON DELETE CASCADE
         );
-
 
         INSERT INTO suboperation_template (input_template_id, output_template_id, suboperation_template_difficulty, suboperation_text)
         VALUES
@@ -191,12 +207,14 @@ cursor.executescript(
             (2, 1, 0.2, 'Выберите узел-замену, если это необходимо (замена на максимальный слева)');
 
 
+        DROP TABLE IF EXISTS operation_template;
         CREATE TABLE operation_template (
             operation_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
             operation_name VARCHAR(20),
             input_template_id INTEGER,
             output_template_id INTEGER,
             operation_template_difficulty FLOAT,
+            operation_template_score FLOAT,
             operation_text VARCHAR(80),
             tree_type_id INTEGER,
 
@@ -204,7 +222,6 @@ cursor.executescript(
             FOREIGN KEY (output_template_id) REFERENCES output_template(output_template_id) ON DELETE CASCADE,
             FOREIGN KEY (tree_type_id) REFERENCES tree_type(tree_type_id) ON DELETE CASCADE
         );
-
 
         INSERT INTO operation_template (operation_name, input_template_id, output_template_id, operation_template_difficulty, operation_text, tree_type_id)
         VALUES
@@ -224,6 +241,7 @@ cursor.executescript(
             ('Удаление узла с заменой на макс. слева', 2, 2, 0.5, 'Выполните удаление узла', 2);
 
 
+        DROP TABLE IF EXISTS operation_suboperation_template;
         CREATE TABLE operation_suboperation_template (
             operation_template_id INTEGER,
             suboperation_template_id INTEGER,
@@ -269,6 +287,7 @@ cursor.executescript(
             (14, 6);
 
 
+        DROP TABLE IF EXISTS formula_task;
         CREATE TABLE formula_task (
             formula_task_id INTEGER PRIMARY KEY AUTOINCREMENT,
             formula_task_body VARCHAR(80)
@@ -279,6 +298,7 @@ cursor.executescript(
             ('sum([1/(mi + 1) for mi in mi_s])/n');
 
 
+        DROP TABLE IF EXISTS task_template;
         CREATE TABLE task_template (
             task_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
             formula_task_id INTEGER,
@@ -295,6 +315,7 @@ cursor.executescript(
         );
 
 
+        DROP TABLE IF EXISTS test_template;
         CREATE TABLE test_template (
             test_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
             test_template_difficulty FLOAT,
@@ -304,6 +325,7 @@ cursor.executescript(
         );
 
 
+        DROP TABLE IF EXISTS test_task_template;
         CREATE TABLE test_task_template (
             test_task_template_id INTEGER PRIMARY KEY AUTOINCREMENT,
             test_template_id INTEGER,
@@ -314,6 +336,7 @@ cursor.executescript(
         );
 
 
+        DROP TABLE IF EXISTS formula_test;
         CREATE TABLE formula_test (
             formula_test_id INTEGER PRIMARY KEY AUTOINCREMENT,
             formula_test_body VARCHAR(80)
@@ -324,6 +347,7 @@ cursor.executescript(
             ('B/sum(zi_s) * sum([ri * zi for ri, zi in zip(ri_s, zi_s)])');
 
 
+        DROP TABLE IF EXISTS testing_session;
         CREATE TABLE testing_session (
             testing_session_id INTEGER PRIMARY KEY AUTOINCREMENT,
             testing_session_name VARCHAR(30),
@@ -341,6 +365,7 @@ cursor.executescript(
         );
 
 
+        DROP TABLE IF EXISTS student_testing_session;
         CREATE TABLE student_testing_session (
             student_testing_session_id INTEGER PRIMARY KEY AUTOINCREMENT,
             testing_session_id INTEGER,
@@ -348,6 +373,73 @@ cursor.executescript(
 
             FOREIGN KEY (testing_session_id) REFERENCES testing_session(testing_session_id) ON DELETE CASCADE,
             FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
+        );
+
+        DROP TABLE IF EXISTS test;
+        CREATE TABLE test (
+            test_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            test_template_id INTEGER,
+            test_mark INTEGER,
+            test_date DATE,
+            test_time_begin TIME,
+            test_time_end TIME,
+            student_id INTEGER,
+            testing_session_id INTEGER,
+
+            FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
+            FOREIGN KEY (test_template_id) REFERENCES test_template(test_template_id) ON DELETE CASCADE,
+            FOREIGN KEY (testing_session_id) REFERENCES testing_session(testing_session_id) ON DELETE CASCADE
+        );
+
+        DROP TABLE IF EXISTS input;
+        CREATE TABLE input (
+            input_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            input_data VARCHAR(50),
+            input_template_id INTEGER,
+            node_action CHAR(50),
+
+            FOREIGN KEY (input_template_id) REFERENCES input_template(input_template_id) ON DELETE CASCADE
+        );
+
+        DROP TABLE IF EXISTS output;
+        CREATE TABLE output (
+            output_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            output_data VARCHAR(50),
+            output_template_id INTEGER,
+
+            FOREIGN KEY (output_template_id) REFERENCES output_template(output_template_id) ON DELETE CASCADE
+        );
+
+        DROP TABLE IF EXISTS task;
+        CREATE TABLE task (
+            task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_template_id INTEGER,
+            test_id INTEGER,
+            tree_template_id INTEGER,
+            input_id INTEGER,
+            output_id INTEGER,
+            task_score FLOAT,
+
+            FOREIGN KEY (task_template_id) REFERENCES task_template(task_template_id) ON DELETE CASCADE,
+            FOREIGN KEY (test_id) REFERENCES test(test_id) ON DELETE CASCADE,
+            FOREIGN KEY (input_id) REFERENCES input(input_id) ON DELETE CASCADE,
+            FOREIGN KEY (output_id) REFERENCES output(output_id) ON DELETE CASCADE,
+            FOREIGN KEY (tree_template_id) REFERENCES tree_template(tree_template_id) ON DELETE CASCADE
+        );
+
+        DROP TABLE IF EXISTS suboperation;
+        CREATE TABLE suboperation (
+            suboperation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            input_id INTEGER,
+            output_id INTEGER,
+            suboperation_template_id INTEGER,
+            task_id INTEGER,
+            suboperation_score FLOAT,
+
+            FOREIGN KEY (task_id) REFERENCES task(task_id) ON DELETE CASCADE,
+            FOREIGN KEY (suboperation_template_id) REFERENCES suboperation_template(suboperation_template_id) ON DELETE CASCADE,
+            FOREIGN KEY (input_id) REFERENCES input(input_id) ON DELETE CASCADE,
+            FOREIGN KEY (output_id) REFERENCES output(output_id) ON DELETE CASCADE
         );
     '''
 )
