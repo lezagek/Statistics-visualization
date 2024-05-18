@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter.messagebox import showerror
 
 from vars import *
+from get_data_from_db import *
 
 class EvaluationOfTestResult(tk.Toplevel):
     def __init__(self):
@@ -37,8 +38,8 @@ class EvaluationOfTestResult(tk.Toplevel):
         tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
 
         def reset_group_year_vars():
-            group_var.set(const_group_var)
-            year_var.set(const_year_var)
+            group_var.set([])
+            year_var.set([])
             group_selected_var.set([])
             year_selected_var.set([])
 
@@ -109,6 +110,15 @@ class EvaluationOfTestResult(tk.Toplevel):
             number_to_analyze_label.grid(row=4, column=0, sticky='w')
             number_analyze_combobox.grid(row=5, column=0, columnspan=2, sticky='w')
 
+            # Обнуление перед началом работы
+            number_analyze_combobox['values'] = []
+
+            # Заполнение данными в зависимости от выбора, что анализировать
+            if cur_analyze.get() == 'СТ':
+                number_analyze_combobox['values'] = get_ST()
+            elif cur_analyze.get() == 'ШТ':
+                number_analyze_combobox['values'] = get_SHT()
+
 
         what_to_analyze_label = tk.Label(choice_frame, text='Что анализировать')
 
@@ -147,8 +157,6 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         cur_number_analyze = tk.StringVar()
         number_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=30)
-        # Данные как пример. Позже необходимо брать из бд
-        number_analyze_combobox['values'] = ['1', '2', '3']
         number_analyze_combobox.bind('<<ComboboxSelected>>', bind_number_to_analyze)
 
 
@@ -187,6 +195,15 @@ class EvaluationOfTestResult(tk.Toplevel):
             group_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
             scroll_selected.config(command=group_selected_listbox.yview)
             scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
+
+            # Добавить зависимость от выбора 'ПО ОДНОМУ'/'ПО НЕСКОЛЬКИМ'
+            # Заполнение данными в зависимости от выбора, что анализировать
+            if cur_analyze.get() == 'СТ':
+                # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся название СТ
+                group_var.set(get_groups_ST(cur_number_analyze.get()))
+            elif cur_analyze.get() == 'ШТ':
+                # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся номер ШТ
+                group_var.set(get_groups_SHT(cur_number_analyze.get()))
 
         # Если выбраны года
         def select_year():
@@ -228,6 +245,10 @@ class EvaluationOfTestResult(tk.Toplevel):
                 scroll_selected.config(command=year_selected_listbox.yview)
                 scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
+                # Добавить зависимость от выбора 'ПО ОДНОМУ'/'ПО НЕСКОЛЬКИМ'
+                # Вызов метода по получению годов из бд, в которые проходили ШТ. Передаётся номер ШТ
+                year_var.set(get_years_SHT(cur_number_analyze.get()))
+
 
         # Добавить выбор группы/годов
         who_to_analyze_label = tk.Label(choice_frame, text='Кого анализировать')
@@ -243,9 +264,9 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         group_label = tk.Label(who_to_analyze_frame, text='Выберите группы')
         year_label = tk.Label(who_to_analyze_frame, text='Выберите года')
-        # Данные как пример. Позже необходимо брать из бд
-        group_var = tk.Variable(value=const_group_var)
-        year_var = tk.Variable(value=const_year_var)
+
+        group_var = tk.Variable()
+        year_var = tk.Variable()
 
         # Фрэймы для вывода listbox с scrollbar
         frame_listbox = tk.Frame(who_to_analyze_frame)
