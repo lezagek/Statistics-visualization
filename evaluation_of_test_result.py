@@ -4,6 +4,7 @@ from tkinter.messagebox import showerror
 
 from vars import *
 from get_data_from_db import *
+from display_graphs import *
 
 class EvaluationOfTestResult(tk.Toplevel):
     def __init__(self):
@@ -388,7 +389,100 @@ class EvaluationOfTestResult(tk.Toplevel):
         values_view_combobox = ['ГРАФИК', 'ДИАГРАММА']
         view_combobox = ttk.Combobox(choice_frame, textvariable=cur_view, width=30)
 
-        btn_analyze = tk.Button(choice_frame, text='Показать')
+        def get_params_to_display(is_one):
+            if cur_analyze.get() == 'СТ':
+                is_ST = True
+                is_group = True
+                # Добавить тернарный параметр
+                marks = get_marks_groups_one_ST(cur_number_analyze.get(), group_selected_var.get())
+            
+            elif cur_analyze.get() == 'ШТ':
+                is_ST = False
+                if selected_who_to_analyze.get() == 'Группы':
+                    is_group = True
+                    # Добавить тернарный параметр с is_one.
+                    # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
+                    marks = get_marks_groups_one_SHT(cur_number_analyze.get(), group_selected_var.get())
+
+                elif selected_who_to_analyze.get() == 'Года':
+                    is_group = False
+                    # Добавить тернарный параметр с is_one.
+                    # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
+                    marks = get_marks_years_one_SHT(cur_number_analyze.get(), year_selected_var.get())
+
+            return marks, is_ST, is_group
+
+        def display_graphs():
+            # По СТ можно анализировать только группы
+            # if cur_analyze.get() == 'СТ':
+            #     # print(get_marks_group_ST(cur_number_analyze.get(), group_selected_var.get()))
+            #     passed_one_st_graph(cur_number_analyze.get(), get_marks_group_ST(cur_number_analyze.get(), group_selected_var.get()))
+            
+            # elif cur_analyze.get() == 'ШТ':
+            #     if selected_who_to_analyze.get() == 'Группы':
+            #         pass
+            #     elif selected_who_to_analyze.get() == 'Года':
+            #         pass
+            
+            match cur_draw.get():
+                case '% УСПЕШНО ПРОЙДЕННЫХ ПО ОДНОМУ СТ/ШТ':
+                    marks, is_ST, is_group = get_params_to_display(True)
+                    is_graph = True if cur_view.get() == 'ГРАФИК' else False
+                    passed_one_st(cur_number_analyze.get(), marks, is_ST, is_group, is_graph)
+
+                case '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ':
+                    marks, is_ST, is_group = get_params_to_display(False)
+
+                    if cur_view.get() == 'ГРАФИК':
+                        pass
+
+                    elif cur_view.get() == 'ДИАГРАММА':
+                        pass
+
+                    elif cur_view.get() == 'ТАБЛИЦА':
+                        pass
+
+                case 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ':
+                    marks, is_ST, is_group = get_params_to_display(True)
+                    is_graph = True if cur_view.get() == 'ГРАФИК' else False
+                    avg_score_one_st(cur_number_analyze.get(), marks, is_ST, is_group, is_graph)
+                    
+                case 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ':
+                    marks, is_ST, is_group = get_params_to_display(False)
+                    
+                    if cur_view.get() == 'ГРАФИК':
+                        pass
+
+                    elif cur_view.get() == 'ДИАГРАММА':
+                        pass
+
+                    elif cur_view.get() == 'ТАБЛИЦА':
+                        pass
+                    
+                case 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ':
+                    marks, is_ST, is_group = get_params_to_display(True)
+                                        
+                    if cur_view.get() == 'ГРАФИК':
+                        pass
+
+                    elif cur_view.get() == 'ДИАГРАММА':
+                        pass
+                    
+                case 'КОЛ-ВО ОЦЕНОК ПО НЕСКОЛЬКИМ СТ/ШТ':
+                    marks, is_ST, is_group = get_params_to_display(False)
+                    
+                    if cur_view.get() == 'ГРАФИК':
+                        pass
+
+                    elif cur_view.get() == 'ДИАГРАММА':
+                        pass
+
+                    elif cur_view.get() == 'ТАБЛИЦА':
+                        pass
+                    
+
+
+        btn_analyze = tk.Button(choice_frame, text='Показать', command=display_graphs)
 
 
         def del_all():
