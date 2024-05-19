@@ -13,7 +13,7 @@ class EvaluationOfTestResult(tk.Toplevel):
     
     def init_evaluation_of_test_result(self):
         self.title('Оценка результатов тестируемых')
-        self.geometry('650x450+350+250')
+        self.geometry('650x480+350+250')
         self.resizable(False, False)
 
         self.grab_set()
@@ -38,16 +38,38 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
 
+        # Сброс переменных для выбора групп и годов
         def reset_group_year_vars():
             group_var.set([])
             year_var.set([])
             group_selected_var.set([])
             year_selected_var.set([])
+        
+        # Сброс переменных для выбора СТ и ШТ
+        def reset_ST_SHT_vars():
+            ST_var.set([])
+            SHT_var.set([])
+            ST_selected_var.set([])
+            SHT_selected_var.set([])
 
-        # После выбора что выводить выводиться следующий виджет
-        def bind_what_to_draw(event):
+        # Сокрытие виджетов для выбора какие СТ/ШТ анализировать
+        def del_number_to_analyze():
             number_to_analyze_label.grid_forget()
-            number_analyze_combobox.grid_forget()
+            number_to_analyze_combobox.grid_forget()
+            number_to_analyze_frame.grid_forget()
+            ST_label.grid_forget()
+            frame_number_listbox.grid_forget()
+            btn_add_ST.grid_forget()
+            btn_del_ST.grid_forget()
+            ST_selected_label.grid_forget()
+            frame_selected_number_listbox.grid_forget()
+            SHT_label.grid_forget()
+            btn_add_SHT.grid_forget()
+            btn_del_SHT.grid_forget()
+            SHT_selected_label.grid_forget()
+        
+        # Сокрытие виджетов для выбора какие группы/года анализировать
+        def del_who_to_analyze():
             who_to_analyze_label.grid_forget()
             btn_group.grid_forget()
             btn_year.grid_forget()
@@ -62,13 +84,24 @@ class EvaluationOfTestResult(tk.Toplevel):
             btn_del_group.grid_forget()
             btn_add_year.grid_forget()
             btn_del_year.grid_forget()
+        
+        # Сокрытие виджетов для выбора вида и кнопки Показать
+        def del_view():
             view_label.grid_forget()
             view_combobox.grid_forget()
             btn_analyze.grid_forget()
 
+
+        # После выбора что выводить выводиться следующий виджет
+        def bind_what_to_draw(event):
+            del_number_to_analyze()
+            del_who_to_analyze()
+            del_view()
+
             cur_analyze.set('')
             cur_view.set('')
             reset_group_year_vars()
+            reset_ST_SHT_vars()
 
             what_to_analyze_label.grid(row=2, column=0, sticky='w')
             analyze_combobox.grid(row=3, column=0, columnspan=2, sticky='w')
@@ -86,39 +119,86 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         # После выбора что анализировать выводиться следующий виджет
         def bind_what_to_analyze(event):
-            who_to_analyze_label.grid_forget()
-            btn_group.grid_forget()
-            btn_year.grid_forget()
-            who_to_analyze_frame.grid_forget()
-            group_label.grid_forget()
-            year_label.grid_forget()
-            frame_listbox.grid_forget()
-            group_selected_label.grid_forget()
-            year_selected_label.grid_forget()
-            frame_selected_listbox.grid_forget()
-            btn_add_group.grid_forget()
-            btn_del_group.grid_forget()
-            btn_add_year.grid_forget()
-            btn_del_year.grid_forget()
-            view_label.grid_forget()
-            view_combobox.grid_forget()
-            btn_analyze.grid_forget()
+            del_who_to_analyze()
+            del_view()
 
             cur_number_analyze.set('')
             cur_view.set('')
             reset_group_year_vars()
+            reset_ST_SHT_vars()
 
-            number_to_analyze_label.grid(row=4, column=0, sticky='w')
-            number_analyze_combobox.grid(row=5, column=0, columnspan=2, sticky='w')
+            if 'ОДНОМУ' in cur_draw.get():
+                number_to_analyze_frame.grid_forget()
 
-            # Обнуление перед началом работы
-            number_analyze_combobox['values'] = []
+                number_to_analyze_label.grid(row=4, column=0, sticky='w')
+                number_to_analyze_combobox.grid(row=5, column=0, columnspan=2, sticky='w')
 
-            # Заполнение данными в зависимости от выбора, что анализировать
-            if cur_analyze.get() == 'СТ':
-                number_analyze_combobox['values'] = get_ST()
-            elif cur_analyze.get() == 'ШТ':
-                number_analyze_combobox['values'] = get_SHT()
+                # Заполнение данными в зависимости от выбора, что анализировать
+                number_to_analyze_combobox['values'] = get_ST() if cur_analyze.get() == 'СТ' else get_SHT()
+
+
+            elif 'НЕСКОЛЬКИМ' in cur_draw.get():
+                number_to_analyze_label.grid_forget()
+                number_to_analyze_combobox.grid_forget()
+
+                number_to_analyze_frame.grid(row=4, column=0, sticky='w')
+
+                if cur_analyze.get() == 'СТ':
+                    SHT_label.grid_forget()
+                    SHT_listbox.pack_forget()
+                    frame_number_listbox.grid_forget()
+                    btn_add_SHT.grid_forget()
+                    btn_del_SHT.grid_forget()
+                    SHT_selected_label.grid_forget()
+                    SHT_selected_listbox.pack_forget()
+                    frame_selected_number_listbox.grid_forget()
+
+                    ST_var.set(get_ST())
+                    
+                    ST_label.grid(row=0, column=0, sticky='w')
+                    frame_number_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
+                    ST_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+                    scroll_number.config(command=ST_listbox.yview)
+                    scroll_number.pack(side=tk.RIGHT, fill=tk.Y)
+
+                    btn_add_ST.grid(row=1, column=1, sticky='w', padx=5)
+                    btn_del_ST.grid(row=2, column=1, sticky='w', padx=5)
+
+                    ST_selected_label.grid(row=0, column=2, sticky='w')
+                    frame_selected_number_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
+                    ST_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+                    scroll_number_selected.config(command=ST_selected_listbox.yview)
+                    scroll_number_selected.pack(side=tk.RIGHT, fill=tk.Y)
+                
+                elif cur_analyze.get() == 'ШТ':
+                    ST_label.grid_forget()
+                    ST_listbox.pack_forget()
+                    frame_number_listbox.grid_forget()
+                    btn_add_ST.grid_forget()
+                    btn_del_ST.grid_forget()
+                    ST_selected_label.grid_forget()
+                    ST_selected_listbox.pack_forget()
+                    frame_selected_number_listbox.grid_forget()
+
+                    SHT_var.set(get_SHT())
+
+                    SHT_label.grid(row=0, column=0, sticky='w')
+                    frame_number_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
+                    SHT_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+                    scroll_number.config(command=SHT_listbox.yview)
+                    scroll_number.pack(side=tk.RIGHT, fill=tk.Y)
+
+                    btn_add_SHT.grid(row=1, column=1, sticky='w', padx=5)
+                    btn_del_SHT.grid(row=2, column=1, sticky='w', padx=5)
+
+                    SHT_selected_label.grid(row=0, column=2, sticky='w')
+                    frame_selected_number_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
+                    SHT_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+                    scroll_number_selected.config(command=SHT_selected_listbox.yview)
+                    scroll_number_selected.pack(side=tk.RIGHT, fill=tk.Y)
+
+
+
 
 
         what_to_analyze_label = tk.Label(choice_frame, text='Что анализировать')
@@ -131,23 +211,12 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         # После выбора какой ст/шт анализировать выводиться следующий виджет
         def bind_number_to_analyze(event):
-            who_to_analyze_frame.grid_forget()
-            group_label.grid_forget()
-            year_label.grid_forget()
-            frame_listbox.grid_forget()
-            group_selected_label.grid_forget()
-            year_selected_label.grid_forget()
-            frame_selected_listbox.grid_forget()
-            btn_add_group.grid_forget()
-            btn_del_group.grid_forget()
-            btn_add_year.grid_forget()
-            btn_del_year.grid_forget()
-            view_label.grid_forget()
-            view_combobox.grid_forget()
-            btn_analyze.grid_forget()
+            del_who_to_analyze()
+            del_view()
 
             cur_view.set('')
             reset_group_year_vars()
+            reset_ST_SHT_vars()
             
             who_to_analyze_label.grid(row=6, column=0, sticky='w')
             btn_group.grid(row=7, column=0, sticky='w')
@@ -157,8 +226,138 @@ class EvaluationOfTestResult(tk.Toplevel):
         number_to_analyze_label = tk.Label(choice_frame, text='Какой СТ/ШТ анализировать')
 
         cur_number_analyze = tk.StringVar()
-        number_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=30)
-        number_analyze_combobox.bind('<<ComboboxSelected>>', bind_number_to_analyze)
+        number_to_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=30)
+        number_to_analyze_combobox.bind('<<ComboboxSelected>>', bind_number_to_analyze)
+
+        # Фрэйм для красивого вывода при выборе нескольких СТ/ШТ
+        number_to_analyze_frame = tk.Frame(choice_frame)
+        number_to_analyze_frame.columnconfigure(0, weight=1)
+        number_to_analyze_frame.columnconfigure(2, weight=1)
+
+        ST_label = tk.Label(number_to_analyze_frame, text='Выберите СТ')
+        SHT_label = tk.Label(number_to_analyze_frame, text='Выберите ШТ')
+
+        ST_var = tk.Variable()
+        SHT_var = tk.Variable()
+
+        # Фрэймы для вывода listbox с scrollbar
+        frame_number_listbox = tk.Frame(number_to_analyze_frame)
+        frame_number_listbox.columnconfigure(0, weight=1)
+        scroll_number = tk.Scrollbar(frame_number_listbox, orient=tk.VERTICAL)
+        
+        frame_selected_number_listbox = tk.Frame(number_to_analyze_frame)
+        frame_selected_number_listbox.columnconfigure(0, weight=1)
+        scroll_number_selected = tk.Scrollbar(frame_selected_number_listbox, orient=tk.VERTICAL)
+
+        # listbox для выбора СТ
+        ST_listbox = tk.Listbox(frame_number_listbox, listvariable=ST_var, selectmode=tk.EXTENDED, height=5)
+        ST_listbox.config(yscrollcommand=scroll_number.set)
+
+        # listbox для выбранных СТ
+        ST_selected_label = tk.Label(number_to_analyze_frame, text='Выбранные СТ')
+        ST_selected_var = tk.Variable(value=[])
+        ST_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=ST_selected_var, selectmode=tk.EXTENDED, height=5)
+        ST_selected_listbox.config(yscrollcommand=scroll_number_selected.set)
+
+        # listbox для выбора ШТ
+        SHT_listbox = tk.Listbox(frame_number_listbox, listvariable=SHT_var, selectmode=tk.EXTENDED, height=5)
+        SHT_listbox.config(yscrollcommand=scroll_number.set)
+
+        # listbox для выбранных ШТ
+        SHT_selected_label = tk.Label(number_to_analyze_frame, text='Выбранные ШТ')
+        SHT_selected_var = tk.Variable(value=[])
+        SHT_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=SHT_selected_var, selectmode=tk.EXTENDED, height=5)
+        SHT_selected_listbox.config(yscrollcommand=scroll_number_selected.set)
+
+        # Показать выбор кого анализировать
+        def show_who_to_analyze():
+            del_who_to_analyze()
+            del_view()
+
+            cur_view.set('')
+            reset_group_year_vars()
+            
+            who_to_analyze_label.grid(row=6, column=0, sticky='w')
+            btn_group.grid(row=7, column=0, sticky='w')
+            btn_year.grid(row=7, column=1, sticky='w')
+
+
+        # Добавление в listbox выбранных СТ
+        def add_selected_ST():
+            select = list(ST_listbox.curselection())
+            select.reverse()
+            for i in select:
+                ST_selected_listbox.insert(tk.END, ST_listbox.get(i))
+                ST_listbox.delete(i)
+
+            # Если не выбран ни один СТ, то скрываем выбор кого анализировать
+            if len(ST_selected_var.get()) == 0:
+                del_who_to_analyze()
+                del_view()
+                cur_view.set('')
+                reset_group_year_vars()
+            else:
+                show_who_to_analyze()
+
+        # Удаление из listbox выбранных СТ
+        def del_selected_ST():
+            select = list(ST_selected_listbox.curselection())
+            select.reverse()
+            for i in select:
+                ST_listbox.insert(tk.END, ST_selected_listbox.get(i))
+                ST_selected_listbox.delete(i)
+
+            # Если не выбран ни один СТ, то скрываем выбор кого анализировать
+            if len(ST_selected_var.get()) == 0:
+                del_who_to_analyze()
+                del_view()
+                cur_view.set('')
+                reset_group_year_vars()
+            else:
+                show_who_to_analyze()
+
+
+        # Добавление в listbox выбранных ШТ
+        def add_selected_SHT():
+            select = list(SHT_listbox.curselection())
+            select.reverse()
+            for i in select:
+                SHT_selected_listbox.insert(tk.END, SHT_listbox.get(i))
+                SHT_listbox.delete(i)
+
+            # Если не выбран ни один ШТ, то скрываем выбор кого анализировать
+            if len(SHT_selected_var.get()) == 0:
+                del_who_to_analyze()
+                del_view()
+                cur_view.set('')
+                reset_group_year_vars()
+            else:
+                show_who_to_analyze()
+
+        # Удаление из listbox выбранных ШТ
+        def del_selected_SHT():
+            select = list(SHT_selected_listbox.curselection())
+            select.reverse()
+            for i in select:
+                SHT_listbox.insert(tk.END, SHT_selected_listbox.get(i))
+                SHT_selected_listbox.delete(i)
+
+            # Если не выбран ни один ШТ, то скрываем выбор кого анализировать
+            if len(SHT_selected_var.get()) == 0:
+                del_who_to_analyze()
+                del_view()
+                cur_view.set('')
+                reset_group_year_vars()
+            else:
+                show_who_to_analyze()
+
+
+        # Кнопки для выбора СТ
+        btn_add_ST = tk.Button(number_to_analyze_frame, text='>>', command=add_selected_ST)
+        btn_del_ST = tk.Button(number_to_analyze_frame, text='<<', command=del_selected_ST)
+        # Кнопки для выбора ШТ
+        btn_add_SHT = tk.Button(number_to_analyze_frame, text='>>', command=add_selected_SHT)
+        btn_del_SHT = tk.Button(number_to_analyze_frame, text='<<', command=del_selected_SHT)
 
 
         # Если выбраны группы
@@ -173,9 +372,8 @@ class EvaluationOfTestResult(tk.Toplevel):
             btn_del_group.grid_forget()
             btn_add_year.grid_forget()
             btn_del_year.grid_forget()
-            view_label.grid_forget()
-            view_combobox.grid_forget()
-            btn_analyze.grid_forget()
+
+            del_view()
 
             cur_view.set('')
             reset_group_year_vars()
@@ -197,14 +395,20 @@ class EvaluationOfTestResult(tk.Toplevel):
             scroll_selected.config(command=group_selected_listbox.yview)
             scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
-            # Добавить зависимость от выбора 'ПО ОДНОМУ'/'ПО НЕСКОЛЬКИМ'
-            # Заполнение данными в зависимости от выбора, что анализировать
-            if cur_analyze.get() == 'СТ':
-                # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся название СТ
-                group_var.set(get_groups_ST(cur_number_analyze.get()))
-            elif cur_analyze.get() == 'ШТ':
-                # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся номер ШТ
-                group_var.set(get_groups_SHT(cur_number_analyze.get()))
+            if 'ОДНОМУ' in cur_draw.get():
+                # Заполнение данными в зависимости от выбора, что анализировать
+                if cur_analyze.get() == 'СТ':
+                    # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся название СТ
+                    group_var.set(get_groups_ST(cur_number_analyze.get()))
+                elif cur_analyze.get() == 'ШТ':
+                    # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся номер ШТ
+                    group_var.set(get_groups_SHT(cur_number_analyze.get()))
+            
+            elif 'НЕСКОЛЬКИМ' in cur_draw.get():
+                if cur_analyze.get() == 'СТ':
+                    group_var.set(get_groups_ST(ST_selected_var.get()))
+                elif cur_analyze.get() == 'ШТ':
+                    group_var.set(get_groups_SHT(SHT_selected_var.get()))
 
         # Если выбраны года
         def select_year():
@@ -218,9 +422,8 @@ class EvaluationOfTestResult(tk.Toplevel):
             btn_del_group.grid_forget()
             btn_add_year.grid_forget()
             btn_del_year.grid_forget()
-            view_label.grid_forget()
-            view_combobox.grid_forget()
-            btn_analyze.grid_forget()
+
+            del_view()
 
             cur_view.set('')
             reset_group_year_vars()
@@ -246,12 +449,14 @@ class EvaluationOfTestResult(tk.Toplevel):
                 scroll_selected.config(command=year_selected_listbox.yview)
                 scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
-                # Добавить зависимость от выбора 'ПО ОДНОМУ'/'ПО НЕСКОЛЬКИМ'
-                # Вызов метода по получению годов из бд, в которые проходили ШТ. Передаётся номер ШТ
-                year_var.set(get_years_SHT(cur_number_analyze.get()))
+                if 'ОДНОМУ' in cur_draw.get():
+                    # Вызов метода по получению годов из бд, в которые проходили ШТ. Передаётся номер ШТ
+                    year_var.set(get_years_SHT(cur_number_analyze.get()))
+                
+                elif 'НЕСКОЛЬКИМ' in cur_draw.get():
+                    year_var.set(get_years_SHT(SHT_selected_var.get()))
 
 
-        # Добавить выбор группы/годов
         who_to_analyze_label = tk.Label(choice_frame, text='Кого анализировать')
         
         selected_who_to_analyze = tk.StringVar()
@@ -297,17 +502,10 @@ class EvaluationOfTestResult(tk.Toplevel):
         year_selected_var = tk.Variable(value=[])
         year_selected_listbox = tk.Listbox(frame_selected_listbox, listvariable=year_selected_var, selectmode=tk.EXTENDED, height=5)
         year_selected_listbox.config(yscrollcommand=scroll.set)
-
-
-        # Скрыть выбор вида анализа
-        def hide_view():
-            view_label.grid_forget()
-            view_combobox.grid_forget()
-            btn_analyze.grid_forget()
         
         # Показать выбор вида анализа
         def show_view():
-            hide_view()
+            del_view()
             view_label.grid(row=9, column=0, sticky='w')
             if 'НЕСКОЛЬКИМ' in cur_draw.get() and 'ТАБЛИЦА' not in values_view_combobox:
                 values_view_combobox.append('ТАБЛИЦА')
@@ -329,7 +527,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             # Если не выбран ни одна группа, то скрываем выбор вида анализа
             if len(group_selected_var.get()) == 0:
-                hide_view()
+                del_view()
             else:
                 show_view()
 
@@ -343,7 +541,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             # Если не выбран ни одна группа, то скрываем выбор вида анализа
             if len(group_selected_var.get()) == 0:
-                hide_view()
+                del_view()
             else:
                 show_view()
 
@@ -358,7 +556,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             # Если не выбран ни один год, то скрываем выбор вида анализа
             if len(year_selected_var.get()) == 0:
-                hide_view()
+                del_view()
             else:
                 show_view()
 
@@ -372,7 +570,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             # Если не выбран ни один год, то скрываем выбор вида анализа
             if len(year_selected_var.get()) == 0:
-                hide_view()
+                del_view()
             else:
                 show_view()
 
@@ -485,28 +683,14 @@ class EvaluationOfTestResult(tk.Toplevel):
         btn_analyze = tk.Button(choice_frame, text='Показать', command=display_graphs)
 
 
+        # Очистка всех виджетов
         def del_all():
             what_to_analyze_label.grid_forget()
             analyze_combobox.grid_forget()
-            number_to_analyze_label.grid_forget()
-            number_analyze_combobox.grid_forget()
-            who_to_analyze_label.grid_forget()
-            btn_group.grid_forget()
-            btn_year.grid_forget()
-            who_to_analyze_frame.grid_forget()
-            group_label.grid_forget()
-            year_label.grid_forget()
-            frame_listbox.grid_forget()
-            group_selected_label.grid_forget()
-            year_selected_label.grid_forget()
-            frame_selected_listbox.grid_forget()
-            btn_add_group.grid_forget()
-            btn_del_group.grid_forget()
-            btn_add_year.grid_forget()
-            btn_del_year.grid_forget()
-            view_label.grid_forget()
-            view_combobox.grid_forget()
-            btn_analyze.grid_forget()
+
+            del_number_to_analyze()
+            del_who_to_analyze()
+            del_view()
 
             cur_draw.set('')
             cur_view.set('')
