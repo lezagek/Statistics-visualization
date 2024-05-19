@@ -36,72 +36,75 @@ def get_SHT():
 
     return SHT
 
-# Получение названий групп, которые проходили конкретный СТ
+# Получение названий групп, которые проходили конкретные СТ
 def get_groups_ST(name_ST):
-    groups = []
+    groups = set()
 
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    query = '''SELECT DISTINCT group_name
-                FROM testing_session
-                LEFT JOIN test USING (testing_session_id)
-                LEFT JOIN student USING (student_id)
-                LEFT JOIN subgroup USING (subgroup_id)
-                LEFT JOIN student_group USING (group_id)
-                WHERE testing_session_name = :p_name'''
-    cursor.execute(query, {'p_name': name_ST})
+    for ST in name_ST:
+        query = '''SELECT DISTINCT group_name
+                    FROM testing_session
+                    LEFT JOIN test USING (testing_session_id)
+                    LEFT JOIN student USING (student_id)
+                    LEFT JOIN subgroup USING (subgroup_id)
+                    LEFT JOIN student_group USING (group_id)
+                    WHERE testing_session_name = :p_name'''
+        cursor.execute(query, {'p_name': ST})
 
-    for name in cursor.fetchall():
-        groups.append(name[0])
-    
+        for name in cursor.fetchall():
+            groups.add(name[0])
+
     conn.commit()
     conn.close()
 
-    return groups
+    return list(groups)
 
-# Получение названий групп, которые проходили конкретный ШТ
+# Получение названий групп, которые проходили конкретные ШТ
 def get_groups_SHT(num_SHT):
-    groups = []
+    groups = set()
 
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    query = '''SELECT DISTINCT group_name
-                FROM test
-                LEFT JOIN student USING (student_id)
-                LEFT JOIN subgroup USING (subgroup_id)
-                LEFT JOIN student_group USING (group_id)
-                WHERE test_template_id = :p_num'''
-    cursor.execute(query, {'p_num': num_SHT})
+    for SHT in num_SHT:
+        query = '''SELECT DISTINCT group_name
+                    FROM test
+                    LEFT JOIN student USING (student_id)
+                    LEFT JOIN subgroup USING (subgroup_id)
+                    LEFT JOIN student_group USING (group_id)
+                    WHERE test_template_id = :p_num'''
+        cursor.execute(query, {'p_num': SHT})
 
-    for name in cursor.fetchall():
-        groups.append(name[0])
+        for name in cursor.fetchall():
+            groups.add(name[0])
     
     conn.commit()
     conn.close()
 
-    return groups
+    return list(groups)
 
-# Получение годов, в которые проходили конкретный ШТ
+# Получение годов, в которые проходили конкретные ШТ
 def get_years_SHT(num_SHT):
-    years = []
+    years = set()
 
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    query = '''SELECT DISTINCT strftime('%Y', testing_session_date)
-                FROM testing_session
-                WHERE test_template_id = :p_num'''
-    cursor.execute(query, {'p_num': num_SHT})
+    for SHT in num_SHT:
+        query = '''SELECT DISTINCT strftime('%Y', testing_session_date)
+                    FROM testing_session
+                    WHERE test_template_id = :p_num'''
+        cursor.execute(query, {'p_num': SHT})
 
-    for year in cursor.fetchall():
-        years.append(year[0])
+        for year in cursor.fetchall():
+            years.add(year[0])
     
     conn.commit()
     conn.close()
 
-    return years
+    return list(years)
 
 
 
