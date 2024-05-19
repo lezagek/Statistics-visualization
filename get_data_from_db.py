@@ -59,7 +59,7 @@ def get_groups_ST(name_ST):
     conn.commit()
     conn.close()
 
-    return list(groups)
+    return sorted(list(groups))
 
 # Получение названий групп, которые проходили конкретные ШТ
 def get_groups_SHT(num_SHT):
@@ -83,7 +83,7 @@ def get_groups_SHT(num_SHT):
     conn.commit()
     conn.close()
 
-    return list(groups)
+    return sorted(list(groups))
 
 # Получение годов, в которые проходили конкретные ШТ
 def get_years_SHT(num_SHT):
@@ -104,7 +104,7 @@ def get_years_SHT(num_SHT):
     conn.commit()
     conn.close()
 
-    return list(years)
+    return sorted(list(years))
 
 
 
@@ -179,6 +179,34 @@ def get_marks_years_one_SHT(num_SHT, years):
         marks[year] = []
         for mark in cursor.fetchall():
             marks[year].append(mark[0])
+    
+    conn.commit()
+    conn.close()
+
+    return marks
+
+# Получение оценок у групп по нескольким СТ
+def get_marks_groups_many_ST(name_ST, groups):
+    marks = {}
+
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+
+    for name in name_ST:
+        marks[name] = {}
+        for group in groups:
+            query = '''SELECT test_mark
+                        FROM testing_session
+                        LEFT JOIN test USING (testing_session_id)
+                        LEFT JOIN student USING (student_id)
+                        LEFT JOIN subgroup USING (subgroup_id)
+                        LEFT JOIN student_group USING (group_id)
+                        WHERE testing_session_name = :p_name and group_name = :p_group'''
+            cursor.execute(query, {'p_name': name, 'p_group': group})
+            
+            marks[name][group] = []
+            for mark in cursor.fetchall():
+                marks[name][group].append(mark[0])
     
     conn.commit()
     conn.close()
