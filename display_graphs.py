@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 # % УСПЕШНО ПРОЙДЕННЫХ ПО ОДНОМУ СТ/ШТ
 def passed_one_st(ST_name, marks, is_ST, is_group, is_graph):
@@ -80,6 +81,70 @@ def avg_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
 
     for i, avg_score in enumerate(avg_score_one_st_vis):
         plt.text(i, avg_score, f'{avg_score:.2f}', ha='center', va='bottom')
+
+    plt.show()
+
+# СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ
+def avg_score_many_st(ST_name, marks, is_ST, is_group, view):
+    avg_score_many_st_vis = {}
+    who_to_analyze_set = set()
+    count_ST = 0
+    # print(marks)
+    # Проходимся по каждой группе/году
+    for ST in marks:
+        # print(ST)
+        # print(marks[ST])
+        avg_score_many_st_vis[ST] = []
+        count_ST += 1
+        for group in marks[ST]:
+            # print(group)
+            # print(marks[ST][group])
+            avg_score_many_st_vis[ST].append(np.mean(marks[ST][group]))
+            who_to_analyze_set.add(group)
+
+    ind = np.arange(1, len(who_to_analyze_set) + 1)
+    width = 1 / (count_ST + 1)
+
+    fig, ax = plt.subplots()
+    fig.set_size_inches(10,5)
+
+    match view:
+        case 'ГРАФИК':
+            for ST in avg_score_many_st_vis:
+                plt.plot(range(len(avg_score_many_st_vis[ST])), avg_score_many_st_vis[ST], marker='o', label=f'СТ №{ST}')
+
+                for j, avg_score in enumerate(avg_score_many_st_vis[ST]):
+                    plt.text(j, avg_score, f'{avg_score:.2f}', ha='center', va='bottom')
+            
+            plt.xticks(range(len(avg_score_many_st_vis[ST])), sorted(list(who_to_analyze_set)))
+            plt.yticks(range(7))
+            plt.xlabel(f'{"Группа" if is_group else "Года"}')
+            plt.ylabel('Средняя оценка')
+            plt.legend()
+
+        case 'ДИАГРАММА':
+            i = 1
+            for ST in avg_score_many_st_vis:
+                plt.bar(ind + (i - (count_ST + 1)/2) * width, avg_score_many_st_vis[ST], width, label=f'СТ №{ST}')
+
+                for j, avg_score in enumerate(avg_score_many_st_vis[ST]):
+                    plt.text(j + 1 + (i - (count_ST + 1)/2) * width, avg_score, f'{avg_score:.2f}', ha='center', va='bottom')
+                i += 1
+
+            plt.xticks(range(1, len(avg_score_many_st_vis[ST]) + 1), sorted(list(who_to_analyze_set)))
+            plt.yticks(range(7))
+            plt.xlabel(f'{"Группа" if is_group else "Года"}')
+            plt.ylabel('Средняя оценка')
+            plt.legend()
+
+        case 'ТАБЛИЦА':
+            ax.axis('off')
+            df = pd.DataFrame.from_dict(avg_score_many_st_vis)
+            ax.table(cellText=df.values, colLabels=df.columns, rowLabels=sorted(list(who_to_analyze_set)), loc='center')
+
+    what_to_analyze = 'СТ' if is_ST else 'ШТ'
+    who_to_analyze = 'групп' if is_group else 'годов'
+    plt.title(f'Средняя оценка за {what_to_analyze} {", ".join(ST_name)} у {who_to_analyze} \n{", ".join(who_to_analyze_set)}')
 
     plt.show()
 
