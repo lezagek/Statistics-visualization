@@ -13,7 +13,7 @@ class EvaluationOfTestResult(tk.Toplevel):
     
     def init_evaluation_of_test_result(self):
         self.title('Оценка результатов тестируемых')
-        self.geometry('650x480+350+250')
+        self.geometry('650x500+350+250')
         self.resizable(False, False)
 
         self.grab_set()
@@ -286,9 +286,15 @@ class EvaluationOfTestResult(tk.Toplevel):
         def add_selected_ST():
             select = list(ST_listbox.curselection())
             select.reverse()
+            # ST_list необходим для упорядоченного вывода СТ
+            ST_list = list(ST_selected_var.get())
             for i in select:
-                ST_selected_listbox.insert(tk.END, ST_listbox.get(i))
+                ST_list.append(ST_listbox.get(i))
                 ST_listbox.delete(i)
+
+            ST_selected_listbox.delete(0, tk.END)
+            for ST in sorted(ST_list):
+                ST_selected_listbox.insert(tk.END, ST)
 
             # Если не выбран ни один СТ, то скрываем выбор кого анализировать
             if len(ST_selected_var.get()) == 0:
@@ -303,9 +309,15 @@ class EvaluationOfTestResult(tk.Toplevel):
         def del_selected_ST():
             select = list(ST_selected_listbox.curselection())
             select.reverse()
+            # ST_list необходим для упорядоченного вывода СТ
+            ST_list = list(ST_var.get())
             for i in select:
-                ST_listbox.insert(tk.END, ST_selected_listbox.get(i))
+                ST_list.append(ST_selected_listbox.get(i))
                 ST_selected_listbox.delete(i)
+
+            ST_listbox.delete(0, tk.END)
+            for ST in sorted(ST_list):
+                ST_listbox.insert(tk.END, ST)
 
             # Если не выбран ни один СТ, то скрываем выбор кого анализировать
             if len(ST_selected_var.get()) == 0:
@@ -321,9 +333,16 @@ class EvaluationOfTestResult(tk.Toplevel):
         def add_selected_SHT():
             select = list(SHT_listbox.curselection())
             select.reverse()
+
+            # SHT_list необходим для упорядоченного вывода ШТ
+            SHT_list = list(SHT_selected_var.get())
             for i in select:
-                SHT_selected_listbox.insert(tk.END, SHT_listbox.get(i))
+                SHT_list.append(SHT_listbox.get(i))
                 SHT_listbox.delete(i)
+
+            SHT_selected_listbox.delete(0, tk.END)
+            for SHT in sorted(SHT_list):
+                SHT_selected_listbox.insert(tk.END, SHT)
 
             # Если не выбран ни один ШТ, то скрываем выбор кого анализировать
             if len(SHT_selected_var.get()) == 0:
@@ -338,9 +357,16 @@ class EvaluationOfTestResult(tk.Toplevel):
         def del_selected_SHT():
             select = list(SHT_selected_listbox.curselection())
             select.reverse()
+
+            # SHT_list необходим для упорядоченного вывода ШТ
+            SHT_list = list(SHT_var.get())
             for i in select:
-                SHT_listbox.insert(tk.END, SHT_selected_listbox.get(i))
+                SHT_list.append(SHT_selected_listbox.get(i))
                 SHT_selected_listbox.delete(i)
+
+            SHT_listbox.delete(0, tk.END)
+            for SHT in sorted(SHT_list):
+                SHT_listbox.insert(tk.END, SHT)
 
             # Если не выбран ни один ШТ, то скрываем выбор кого анализировать
             if len(SHT_selected_var.get()) == 0:
@@ -521,9 +547,16 @@ class EvaluationOfTestResult(tk.Toplevel):
         def add_selected_group():
             select = list(group_listbox.curselection())
             select.reverse()
+            
+            # group_list необходим для упорядоченного вывода групп
+            group_list = list(group_selected_var.get())
             for i in select:
-                group_selected_listbox.insert(tk.END, group_listbox.get(i))
+                group_list.append(group_listbox.get(i))
                 group_listbox.delete(i)
+
+            group_selected_listbox.delete(0, tk.END)
+            for group in sorted(group_list):
+                group_selected_listbox.insert(tk.END, group)
 
             # Если не выбран ни одна группа, то скрываем выбор вида анализа
             if len(group_selected_var.get()) == 0:
@@ -535,9 +568,16 @@ class EvaluationOfTestResult(tk.Toplevel):
         def del_selected_group():
             select = list(group_selected_listbox.curselection())
             select.reverse()
+            
+            # group_list необходим для упорядоченного вывода групп
+            group_list = list(group_var.get())
             for i in select:
-                group_listbox.insert(tk.END, group_selected_listbox.get(i))
+                group_list.append(group_selected_listbox.get(i))
                 group_selected_listbox.delete(i)
+
+            group_listbox.delete(0, tk.END)
+            for group in sorted(group_list):
+                group_listbox.insert(tk.END, group)
 
             # Если не выбран ни одна группа, то скрываем выбор вида анализа
             if len(group_selected_var.get()) == 0:
@@ -550,9 +590,16 @@ class EvaluationOfTestResult(tk.Toplevel):
         def add_selected_year():
             select = list(year_listbox.curselection())
             select.reverse()
+            
+            # year_list необходим для упорядоченного вывода групп
+            year_list = list(year_selected_var.get())
             for i in select:
-                year_selected_listbox.insert(tk.END, year_listbox.get(i))
+                year_list.append(year_listbox.get(i))
                 year_listbox.delete(i)
+
+            year_selected_listbox.delete(0, tk.END)
+            for year in sorted(year_list):
+                year_selected_listbox.insert(tk.END, year)
 
             # Если не выбран ни один год, то скрываем выбор вида анализа
             if len(year_selected_var.get()) == 0:
@@ -564,9 +611,16 @@ class EvaluationOfTestResult(tk.Toplevel):
         def del_selected_year():
             select = list(year_selected_listbox.curselection())
             select.reverse()
+            
+            # year_list необходим для упорядоченного вывода групп
+            year_list = list(year_var.get())
             for i in select:
-                year_listbox.insert(tk.END, year_selected_listbox.get(i))
+                year_list.append(year_selected_listbox.get(i))
                 year_selected_listbox.delete(i)
+
+            year_listbox.delete(0, tk.END)
+            for year in sorted(year_list):
+                year_listbox.insert(tk.END, year)
 
             # Если не выбран ни один год, то скрываем выбор вида анализа
             if len(year_selected_var.get()) == 0:
@@ -591,22 +645,28 @@ class EvaluationOfTestResult(tk.Toplevel):
             if cur_analyze.get() == 'СТ':
                 is_ST = True
                 is_group = True
-                # Добавить тернарный параметр
-                marks = get_marks_groups_one_ST(cur_number_analyze.get(), group_selected_var.get())
+                if is_one:
+                    marks = get_marks_groups_one_ST(cur_number_analyze.get(), group_selected_var.get())
+                else:
+                    marks = get_marks_groups_many_ST(ST_selected_var.get(), group_selected_var.get())
             
             elif cur_analyze.get() == 'ШТ':
                 is_ST = False
                 if selected_who_to_analyze.get() == 'Группы':
                     is_group = True
-                    # Добавить тернарный параметр с is_one.
-                    # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
-                    marks = get_marks_groups_one_SHT(cur_number_analyze.get(), group_selected_var.get())
+                    if is_one:
+                        # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
+                        marks = get_marks_groups_one_SHT(cur_number_analyze.get(), group_selected_var.get())
+                    else:
+                        pass
 
                 elif selected_who_to_analyze.get() == 'Года':
                     is_group = False
-                    # Добавить тернарный параметр с is_one.
-                    # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
-                    marks = get_marks_years_one_SHT(cur_number_analyze.get(), year_selected_var.get())
+                    if is_one:
+                        # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
+                        marks = get_marks_years_one_SHT(cur_number_analyze.get(), year_selected_var.get())
+                    else:
+                        pass
 
             return marks, is_ST, is_group
 
@@ -647,15 +707,7 @@ class EvaluationOfTestResult(tk.Toplevel):
                     
                 case 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
-                    
-                    if cur_view.get() == 'ГРАФИК':
-                        pass
-
-                    elif cur_view.get() == 'ДИАГРАММА':
-                        pass
-
-                    elif cur_view.get() == 'ТАБЛИЦА':
-                        pass
+                    avg_score_many_st(ST_selected_var.get(), marks, is_ST, is_group, cur_view.get())
                     
                 case 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
