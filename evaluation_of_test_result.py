@@ -54,7 +54,8 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         # Сокрытие виджетов для выбора какие СТ/ШТ анализировать
         def del_number_to_analyze():
-            number_to_analyze_label.grid_forget()
+            number_to_analyze_ST_label.grid_forget()
+            number_to_analyze_SHT_label.grid_forget()
             number_to_analyze_combobox.grid_forget()
             number_to_analyze_frame.grid_forget()
             ST_label.grid_forget()
@@ -111,7 +112,7 @@ class EvaluationOfTestResult(tk.Toplevel):
         what_to_draw_label.grid(row=0, column=0, sticky='w')
 
         cur_draw = tk.StringVar()
-        draw_values = ['% УСПЕШНО ПРОЙДЕННЫХ ПО ОДНОМУ СТ/ШТ', '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ', 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ', 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ', 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ', 'КОЛ-ВО ОЦЕНОК ПО НЕСКОЛЬКИМ СТ/ШТ']
+        draw_values = ['% УСПЕШНО ПРОЙДЕННЫХ ПО ОДНОМУ СТ/ШТ', '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ', 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ', 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ', 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ']
         draw_combobox = ttk.Combobox(choice_frame, textvariable=cur_draw, width=52, values=draw_values)
         draw_combobox.grid(row=1, column=0, columnspan=2, sticky='w')
         draw_combobox.bind('<<ComboboxSelected>>', bind_what_to_draw)
@@ -129,21 +130,29 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             if 'ОДНОМУ' in cur_draw.get():
                 number_to_analyze_frame.grid_forget()
+                number_to_analyze_ST_label.grid_forget()
+                number_to_analyze_SHT_label.grid_forget()
 
-                number_to_analyze_label.grid(row=4, column=0, sticky='w')
                 number_to_analyze_combobox.grid(row=5, column=0, columnspan=2, sticky='w')
 
                 # Заполнение данными в зависимости от выбора, что анализировать
-                number_to_analyze_combobox['values'] = get_ST() if cur_analyze.get() == 'СТ' else get_SHT()
+                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+                    number_to_analyze_ST_label.grid(row=4, column=0, sticky='w')
+                    number_to_analyze_combobox['values'] = get_ST()
 
+                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+                    number_to_analyze_SHT_label.grid(row=4, column=0, sticky='w')
+                    number_to_analyze_combobox['values'] = get_SHT()
+                
 
             elif 'НЕСКОЛЬКИМ' in cur_draw.get():
-                number_to_analyze_label.grid_forget()
+                number_to_analyze_ST_label.grid_forget()
+                number_to_analyze_SHT_label.grid_forget()
                 number_to_analyze_combobox.grid_forget()
 
                 number_to_analyze_frame.grid(row=4, column=0, sticky='w')
 
-                if cur_analyze.get() == 'СТ':
+                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
                     SHT_label.grid_forget()
                     SHT_listbox.pack_forget()
                     frame_number_listbox.grid_forget()
@@ -170,7 +179,7 @@ class EvaluationOfTestResult(tk.Toplevel):
                     scroll_number_selected.config(command=ST_selected_listbox.yview)
                     scroll_number_selected.pack(side=tk.RIGHT, fill=tk.Y)
                 
-                elif cur_analyze.get() == 'ШТ':
+                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                     ST_label.grid_forget()
                     ST_listbox.pack_forget()
                     frame_number_listbox.grid_forget()
@@ -198,14 +207,11 @@ class EvaluationOfTestResult(tk.Toplevel):
                     scroll_number_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
 
-
-
-
         what_to_analyze_label = tk.Label(choice_frame, text='Что анализировать')
 
         cur_analyze = tk.StringVar()
         analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_analyze, width=30)
-        analyze_combobox['values'] = ['СТ', 'ШТ']
+        analyze_combobox['values'] = ['СЕАНС ТЕСТИРОВАНИЯ', 'ШАБЛОН ТЕСТИРОВАНИЯ']
         analyze_combobox.bind('<<ComboboxSelected>>', bind_what_to_analyze)
 
 
@@ -223,7 +229,8 @@ class EvaluationOfTestResult(tk.Toplevel):
             btn_year.grid(row=7, column=1, sticky='w')
 
 
-        number_to_analyze_label = tk.Label(choice_frame, text='Какой СТ/ШТ анализировать')
+        number_to_analyze_ST_label  = tk.Label(choice_frame, text='Выберите СТ')
+        number_to_analyze_SHT_label  = tk.Label(choice_frame, text='Выберите ШТ')
 
         cur_number_analyze = tk.StringVar()
         number_to_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=30)
@@ -268,6 +275,7 @@ class EvaluationOfTestResult(tk.Toplevel):
         SHT_selected_var = tk.Variable(value=[])
         SHT_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=SHT_selected_var, selectmode=tk.EXTENDED, height=5)
         SHT_selected_listbox.config(yscrollcommand=scroll_number_selected.set)
+
 
         # Показать выбор кого анализировать
         def show_who_to_analyze():
@@ -423,17 +431,17 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             if 'ОДНОМУ' in cur_draw.get():
                 # Заполнение данными в зависимости от выбора, что анализировать
-                if cur_analyze.get() == 'СТ':
+                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
                     # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся название СТ
                     group_var.set(get_groups_ST(cur_number_analyze.get()))
-                elif cur_analyze.get() == 'ШТ':
+                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                     # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся номер ШТ
                     group_var.set(get_groups_SHT(cur_number_analyze.get()))
             
             elif 'НЕСКОЛЬКИМ' in cur_draw.get():
-                if cur_analyze.get() == 'СТ':
+                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
                     group_var.set(get_groups_ST(ST_selected_var.get()))
-                elif cur_analyze.get() == 'ШТ':
+                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                     group_var.set(get_groups_SHT(SHT_selected_var.get()))
 
         # Если выбраны года
@@ -454,7 +462,7 @@ class EvaluationOfTestResult(tk.Toplevel):
             cur_view.set('')
             reset_group_year_vars()
             
-            if cur_analyze.get() == 'СТ':
+            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
                 who_to_analyze_frame.grid_forget()
                 showerror(parent=self, title='Ошибка', message='Выбрать года можно только для ШТ')
             else:
@@ -641,8 +649,9 @@ class EvaluationOfTestResult(tk.Toplevel):
         values_view_combobox = ['ГРАФИК', 'ДИАГРАММА']
         view_combobox = ttk.Combobox(choice_frame, textvariable=cur_view, width=30)
 
+
         def get_params_to_display(is_one):
-            if cur_analyze.get() == 'СТ':
+            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
                 is_ST = True
                 is_group = True
                 if is_one:
@@ -650,38 +659,25 @@ class EvaluationOfTestResult(tk.Toplevel):
                 else:
                     marks = get_marks_groups_many_ST(ST_selected_var.get(), group_selected_var.get())
             
-            elif cur_analyze.get() == 'ШТ':
+            elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                 is_ST = False
                 if selected_who_to_analyze.get() == 'Группы':
                     is_group = True
                     if is_one:
-                        # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
                         marks = get_marks_groups_one_SHT(cur_number_analyze.get(), group_selected_var.get())
                     else:
-                        pass
+                        marks = get_marks_groups_many_SHT(SHT_selected_var.get(), group_selected_var.get())
 
                 elif selected_who_to_analyze.get() == 'Года':
                     is_group = False
                     if is_one:
-                        # Если is_one False, то вызывать функцию получения оценок по нескольким СТ/ШТ
                         marks = get_marks_years_one_SHT(cur_number_analyze.get(), year_selected_var.get())
                     else:
-                        pass
+                        marks = get_marks_years_many_SHT(SHT_selected_var.get(), year_selected_var.get())
 
             return marks, is_ST, is_group
 
         def display_graphs():
-            # По СТ можно анализировать только группы
-            # if cur_analyze.get() == 'СТ':
-            #     # print(get_marks_group_ST(cur_number_analyze.get(), group_selected_var.get()))
-            #     passed_one_st_graph(cur_number_analyze.get(), get_marks_group_ST(cur_number_analyze.get(), group_selected_var.get()))
-            
-            # elif cur_analyze.get() == 'ШТ':
-            #     if selected_who_to_analyze.get() == 'Группы':
-            #         pass
-            #     elif selected_who_to_analyze.get() == 'Года':
-            #         pass
-            
             match cur_draw.get():
                 case '% УСПЕШНО ПРОЙДЕННЫХ ПО ОДНОМУ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
@@ -690,15 +686,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
                 case '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
-
-                    if cur_view.get() == 'ГРАФИК':
-                        pass
-
-                    elif cur_view.get() == 'ДИАГРАММА':
-                        pass
-
-                    elif cur_view.get() == 'ТАБЛИЦА':
-                        pass
+                    passed_many_st(marks, is_ST, is_group, cur_view.get())
 
                 case 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
@@ -707,29 +695,12 @@ class EvaluationOfTestResult(tk.Toplevel):
                     
                 case 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
-                    avg_score_many_st(ST_selected_var.get(), marks, is_ST, is_group, cur_view.get())
+                    avg_score_many_st(marks, is_ST, is_group, cur_view.get())
                     
                 case 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
-                                        
-                    if cur_view.get() == 'ГРАФИК':
-                        pass
-
-                    elif cur_view.get() == 'ДИАГРАММА':
-                        pass
-                    
-                case 'КОЛ-ВО ОЦЕНОК ПО НЕСКОЛЬКИМ СТ/ШТ':
-                    marks, is_ST, is_group = get_params_to_display(False)
-                    
-                    if cur_view.get() == 'ГРАФИК':
-                        pass
-
-                    elif cur_view.get() == 'ДИАГРАММА':
-                        pass
-
-                    elif cur_view.get() == 'ТАБЛИЦА':
-                        pass
-                    
+                    is_graph = True if cur_view.get() == 'ГРАФИК' else False
+                    count_score_one_st(cur_number_analyze.get(), marks, is_ST, is_group, is_graph)
 
 
         btn_analyze = tk.Button(choice_frame, text='Показать', command=display_graphs)
