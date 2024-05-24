@@ -212,3 +212,58 @@ def get_marks_groups_many_ST(name_ST, groups):
     conn.close()
 
     return marks
+
+# Получение оценок у групп по нескольким ШТ
+def get_marks_groups_many_SHT(num_SHT, groups):
+    marks = {}
+
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+
+    for num in num_SHT:
+        marks[num] = {}
+        for group in groups:
+            query = '''SELECT test_mark
+                        FROM test
+                        LEFT JOIN student USING (student_id)
+                        LEFT JOIN subgroup USING (subgroup_id)
+                        LEFT JOIN student_group USING (group_id)
+                        WHERE test_template_id = :p_num and group_name = :p_group'''
+            cursor.execute(query, {'p_num': num, 'p_group': group})
+            
+            marks[num][group] = []
+            for mark in cursor.fetchall():
+                marks[num][group].append(mark[0])
+    
+    conn.commit()
+    conn.close()
+
+    return marks
+
+# Получение оценок у годов по нескольким ШТ
+def get_marks_years_many_SHT(num_SHT, years):
+    marks = {}
+
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+
+    for num in num_SHT:
+        marks[num] = {}
+        for year in years:
+            query = '''SELECT test_mark
+                        FROM testing_session
+                        LEFT JOIN test USING (testing_session_id)
+                        LEFT JOIN student USING (student_id)
+                        LEFT JOIN subgroup USING (subgroup_id)
+                        LEFT JOIN student_group USING (group_id)
+                        WHERE testing_session.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
+            cursor.execute(query, {'p_num': num, 'p_year': year})
+            
+            marks[num][year] = []
+            for mark in cursor.fetchall():
+                marks[num][year].append(mark[0])
+    
+    conn.commit()
+    conn.close()
+
+    return marks
