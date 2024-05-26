@@ -93,7 +93,7 @@ class EvaluationOfTestResult(tk.Toplevel):
             btn_analyze.grid_forget()
 
 
-        # После выбора что выводить выводиться следующий виджет
+        # После выбора что выводить выводится следующий виджет
         def bind_what_to_draw(event):
             del_number_to_analyze()
             del_who_to_analyze()
@@ -118,7 +118,7 @@ class EvaluationOfTestResult(tk.Toplevel):
         draw_combobox.bind('<<ComboboxSelected>>', bind_what_to_draw)
 
 
-        # После выбора что анализировать выводиться следующий виджет
+        # После выбора что анализировать выводится следующий виджет
         def bind_what_to_analyze(event):
             del_who_to_analyze()
             del_view()
@@ -215,7 +215,7 @@ class EvaluationOfTestResult(tk.Toplevel):
         analyze_combobox.bind('<<ComboboxSelected>>', bind_what_to_analyze)
 
 
-        # После выбора какой ст/шт анализировать выводиться следующий виджет
+        # После выбора какой ст/шт анализировать выводится следующий виджет
         def bind_number_to_analyze(event):
             del_who_to_analyze()
             del_view()
