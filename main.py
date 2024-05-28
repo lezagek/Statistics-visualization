@@ -1,6 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
-import sqlite3
 
 from vars import *
 
@@ -37,7 +35,7 @@ if __name__ == '__main__':
     app = Main(root)
     app.grid()
     root.title('ЯDraw')
-    root.geometry('650x450+300+200')
+    root.state('zoomed')
     root.resizable(False, False)
     root.config()
     root.grid_rowconfigure(0, weight=1)
