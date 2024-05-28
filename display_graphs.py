@@ -9,20 +9,16 @@ def passed_one_st(ST_name, marks, is_ST, is_group, is_graph):
 
     # Проходимся по каждой группе/году
     for group in marks:
-        # Сортируем оценки
-        marks[group] = sorted(marks[group])
-        # Находим 3 (успешно пройдено при оценке >=3 )
-        if 3 in marks[group]:
-            ind = marks[group].index(3)
-        elif 4 in marks[group]:
-            ind = marks[group].index(4)
-        elif 5 in marks[group]:
-            ind = marks[group].index(5)
-        else:
-            ind = len(marks[group])
+        # Считаем кол-во успешно пройденных для каждой группы
+        count_passed = 0
+        for mark in marks[group]:
+            # Перерасчитываем для 100-балльной системы
+            new_mark = mark[0] / mark[1] * 100
+            if new_mark >= 60:
+                count_passed += 1
 
         # Узнаём процент успешно пройденных
-        passed = (len(marks[group]) - ind) / len(marks[group]) * 100
+        passed = (count_passed) / len(marks[group]) * 100
         passed_one_st_vis.append(passed)
 
         who_to_analyze_list.append(group)
@@ -36,7 +32,6 @@ def passed_one_st(ST_name, marks, is_ST, is_group, is_graph):
     else:
         plt.bar(range(len(passed_one_st_vis)), passed_one_st_vis, edgecolor='black')
 
-    # , rotation=45 если понадобится повернуть подписи
     plt.xticks(range(len(passed_one_st_vis)), who_to_analyze_list)
     plt.ylim(0, 110)
     plt.xlabel(f'{"Группа" if is_group else "Года"}')
@@ -45,8 +40,8 @@ def passed_one_st(ST_name, marks, is_ST, is_group, is_graph):
     who_to_analyze = 'групп' if is_group else 'годов'
     plt.title(f'% успешно пройденных {what_to_analyze} {ST_name} у {who_to_analyze} \n{", ".join(who_to_analyze_list)}')
 
-    for i, avg_score in enumerate(passed_one_st_vis):
-        plt.text(i, avg_score, f'{avg_score:.2f}', ha='center', va='bottom')
+    for i, passed_score in enumerate(passed_one_st_vis):
+        plt.text(i, passed_score, f'{passed_score:.2f}', ha='center', va='bottom')
 
     plt.show()
 
@@ -66,25 +61,21 @@ def passed_many_st(marks, is_ST, is_group, view):
 
         # Проходимся по каждой группе/году
         for group in marks[ST]:
-            # Сортируем оценки
-            marks[ST][group] = sorted(marks[ST][group])
-            # Находим 3 (успешно пройдено при оценке >=3 )
-            if 3 in marks[ST][group]:
-                ind = marks[ST][group].index(3)
-            elif 4 in marks[ST][group]:
-                ind = marks[ST][group].index(4)
-            elif 5 in marks[ST][group]:
-                ind = marks[ST][group].index(5)
-            else:
-                ind = len(marks[ST][group])
-
-            # Узнаём процент успешно пройденных
-            if len(marks[ST][group]) != 0:
-                passed = (len(marks[ST][group]) - ind) / len(marks[ST][group]) * 100
-            else:
+            # Если группа/год не проходил(а) СТ/ШТ
+            if len(marks[ST][group]) == 0:
                 passed = 0
-            passed_many_st_vis[ST].append(round(passed, 2))
+            else:
+                # Считаем кол-во успешно пройденных для каждой группы
+                count_passed = 0
+                for mark in marks[ST][group]:
+                    # Перерасчитываем для 100-балльной системы
+                    new_mark = mark[0] / mark[1] * 100
+                    if new_mark >= 60:
+                        count_passed += 1
+                # Узнаём % успешно пройденных
+                passed = (count_passed) / len(marks[ST][group]) * 100
 
+            passed_many_st_vis[ST].append(round(passed, 2))
             who_to_analyze_set.add(group)
 
     ind = np.arange(1, len(who_to_analyze_set) + 1)
@@ -92,13 +83,11 @@ def passed_many_st(marks, is_ST, is_group, view):
 
     fig, ax = plt.subplots()
     fig.set_size_inches(10,5)
-
-    what_to_analyze = 'СТ' if is_ST else 'ШТ'
     
     match view:
         case 'ГРАФИК':
             for ST in passed_many_st_vis:
-                plt.plot(range(len(passed_many_st_vis[ST])), passed_many_st_vis[ST], marker='o', label=f'{what_to_analyze} {ST}')
+                plt.plot(range(len(passed_many_st_vis[ST])), passed_many_st_vis[ST], marker='o', label=f'{ST}')
 
                 for j, passed_score in enumerate(passed_many_st_vis[ST]):
                     plt.text(j, passed_score, f'{passed_score:.2f}', ha='center', va='bottom')
@@ -107,12 +96,12 @@ def passed_many_st(marks, is_ST, is_group, view):
             plt.ylim(0, 110)
             plt.xlabel(f'{"Группа" if is_group else "Года"}')
             plt.ylabel('%')
-            plt.legend()
+            plt.legend(bbox_to_anchor=(1, 1))
 
         case 'ДИАГРАММА':
             i = 1
             for ST in passed_many_st_vis:
-                plt.bar(ind + (i - (count_ST + 1)/2) * width, passed_many_st_vis[ST], width, label=f'{what_to_analyze} {ST}')
+                plt.bar(ind + (i - (count_ST + 1)/2) * width, passed_many_st_vis[ST], width, label=f'{ST}')
                 
                 for j, passed_score in enumerate(passed_many_st_vis[ST]):
                     plt.text(j + 1 + (i - (count_ST + 1)/2) * width, passed_score, f'{passed_score:.2f}', ha='center', va='bottom')
@@ -123,17 +112,16 @@ def passed_many_st(marks, is_ST, is_group, view):
             plt.ylim(0, 110)
             plt.xlabel(f'{"Группа" if is_group else "Года"}')
             plt.ylabel('%')
-            plt.legend()
+            plt.legend(bbox_to_anchor=(1, 1))
 
         case 'ТАБЛИЦА':
             ax.axis('off')
             df = pd.DataFrame.from_dict(passed_many_st_vis)
             ax.table(cellText=df.values, colLabels=df.columns, rowLabels=sorted(list(who_to_analyze_set)), loc='center')
     
-    
+    what_to_analyze = 'СТ' if is_ST else 'ШТ'
     who_to_analyze = 'групп' if is_group else 'годов'
     plt.title(f'% успешно пройденных {what_to_analyze} {", ".join(ST_name)} у {who_to_analyze} \n{", ".join(who_to_analyze_set)}')
-
     plt.show()
 
 
@@ -144,7 +132,11 @@ def avg_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
 
     # Проходимся по каждой группе/году
     for group in marks:
-        avg_score_one_st_vis.append(np.mean(marks[group]))
+        new_marks = []
+        for mark in marks[group]:
+            # Перерасчитываем для 100-балльной системы
+            new_marks.append(mark[0] / mark[1] * 100)
+        avg_score_one_st_vis.append(np.mean(new_marks))
         who_to_analyze_list.append(group)
 
     fig, ax = plt.subplots()
@@ -157,7 +149,7 @@ def avg_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
         plt.bar(range(len(avg_score_one_st_vis)), avg_score_one_st_vis, edgecolor='black')
 
     plt.xticks(range(len(avg_score_one_st_vis)), who_to_analyze_list)
-    plt.yticks(range(7))
+    plt.ylim(0, 110)
 
     plt.xlabel(f'{"Группа" if is_group else "Года"}')
     plt.ylabel('Средняя оценка')
@@ -177,25 +169,26 @@ def avg_score_many_st(marks, is_ST, is_group, view):
     who_to_analyze_set = set()
     count_ST = 0
     ST_name = []
-    # print(marks)
+
     # Проходимся по каждому СТ/ШТ
     for ST in marks:
-        # print(ST)
-        # print(marks[ST])
         avg_score_many_st_vis[ST] = []
         count_ST += 1
         ST_name.append(str(ST))
 
         # Проходимся по каждой группе/году
         for group in marks[ST]:
-            # print(group)
-            # print(marks[ST][group])
-
-            # Как тест. Возможно потом убрать. Ровнее выстраиваются диаграммы, но не понятны графики.
+            # Если группа/год не проходил(а) СТ/ШТ
             if len(marks[ST][group]) == 0:
                 avg_score_many_st_vis[ST].append(0)
             else:
-                avg_score_many_st_vis[ST].append(round(np.mean(marks[ST][group]), 2))
+                new_marks = []
+                for mark in marks[ST][group]:
+                    # Перерасчитываем для 100-балльной системы
+                    new_marks.append(mark[0] / mark[1] * 100)
+                # Узнаём среднюю оценку
+                avg_score_many_st_vis[ST].append(round(np.mean(new_marks), 2))
+
             who_to_analyze_set.add(group)
 
     ind = np.arange(1, len(who_to_analyze_set) + 1)
@@ -204,37 +197,34 @@ def avg_score_many_st(marks, is_ST, is_group, view):
     fig, ax = plt.subplots()
     fig.set_size_inches(10,5)
 
-    what_to_analyze = 'СТ' if is_ST else 'ШТ'
-
     match view:
         case 'ГРАФИК':
             for ST in avg_score_many_st_vis:
-                plt.plot(range(len(avg_score_many_st_vis[ST])), avg_score_many_st_vis[ST], marker='o', label=f'{what_to_analyze} {ST}')
+                plt.plot(range(len(avg_score_many_st_vis[ST])), avg_score_many_st_vis[ST], marker='o', label=f'{ST}')
 
                 for j, avg_score in enumerate(avg_score_many_st_vis[ST]):
                     plt.text(j, avg_score, f'{avg_score:.2f}', ha='center', va='bottom')
             
             plt.xticks(range(len(avg_score_many_st_vis[ST])), sorted(list(who_to_analyze_set)))
-            plt.yticks(range(7))
+            plt.ylim(0, 110)
             plt.xlabel(f'{"Группа" if is_group else "Года"}')
             plt.ylabel('Средняя оценка')
-            plt.legend()
+            plt.legend(bbox_to_anchor=(1, 1))
 
         case 'ДИАГРАММА':
             i = 1
             for ST in avg_score_many_st_vis:
-                # print(ind + (i - (count_ST + 1)/2) * width, avg_score_many_st_vis[ST])
-                plt.bar(ind + (i - (count_ST + 1)/2) * width, avg_score_many_st_vis[ST], width, label=f'{what_to_analyze} {ST}')
+                plt.bar(ind + (i - (count_ST + 1)/2) * width, avg_score_many_st_vis[ST], width, label=f'{ST}')
 
                 for j, avg_score in enumerate(avg_score_many_st_vis[ST]):
                     plt.text(j + 1 + (i - (count_ST + 1)/2) * width, avg_score, f'{avg_score:.2f}', ha='center', va='bottom')
                 i += 1
 
             plt.xticks(range(1, len(avg_score_many_st_vis[ST]) + 1), sorted(list(who_to_analyze_set)))
-            plt.yticks(range(7))
+            plt.ylim(0, 110)
             plt.xlabel(f'{"Группа" if is_group else "Года"}')
             plt.ylabel('Средняя оценка')
-            plt.legend()
+            plt.legend(bbox_to_anchor=(1, 1))
 
         case 'ТАБЛИЦА':
             ax.axis('off')
@@ -242,10 +232,9 @@ def avg_score_many_st(marks, is_ST, is_group, view):
             df = df.fillna('-')
             ax.table(cellText=df.values, colLabels=df.columns, rowLabels=sorted(list(who_to_analyze_set)), loc='center')
 
+    what_to_analyze = 'СТ' if is_ST else 'ШТ'
     who_to_analyze = 'групп' if is_group else 'годов'
-        
     plt.title(f'Средняя оценка за {what_to_analyze} {", ".join(ST_name)} у {who_to_analyze} \n{", ".join(who_to_analyze_set)}')
-
     plt.show()
 
 
@@ -255,7 +244,7 @@ def count_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
     count_scores = {}
     count_group = 0
 
-     # Проходимся по каждой группе/году
+    # Проходимся по каждой группе/году
     for group in marks:
         count_scores[group] = [0, 0, 0, 0, 0]
         count_group += 1
@@ -263,7 +252,18 @@ def count_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
 
         # Считаем кол-во оценок для каждой группы
         for mark in marks[group]:
-            count_scores[group][mark - 1] += 1
+            # Перерасчитываем для 100-балльной системы
+            new_mark = mark[0] / mark[1] * 100
+            if new_mark >= 0 and new_mark <= 20:
+                count_scores[group][0] += 1
+            elif new_mark >= 21 and new_mark <= 40:
+                count_scores[group][1] += 1
+            elif new_mark >= 41 and new_mark <= 60:
+                count_scores[group][2] += 1
+            elif new_mark >= 61 and new_mark <= 80:
+                count_scores[group][3] += 1
+            elif new_mark >= 81 and new_mark <= 100:
+                count_scores[group][4] += 1
 
     # До 6, так как 5 оценок
     ind = np.arange(1, 6)
@@ -272,16 +272,16 @@ def count_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
     fig, ax = plt.subplots()
     fig.set_size_inches(15,5)
 
-    what_to_analyze = 'СТ' if is_ST else 'ШТ'
-    who_to_analyze = 'групп' if is_group else 'годов'
-
     if is_graph:
         for group in count_scores:
             plt.plot(range(len(count_scores[group])), count_scores[group], marker='o', label=f'{group}')
 
             for j, count in enumerate(count_scores[group]):
                 plt.text(j, count, f'{count:.2f}', ha='center', va='bottom')
-        plt.xticks(range(5))
+
+        x_ticks = range(5)
+        x_labels = ['0-20', '21-40', '41-60', '61-80', '81-100']
+        plt.xticks (ticks=x_ticks, labels=x_labels)
 
     else:
         i = 1
@@ -291,10 +291,15 @@ def count_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
             for j, count in enumerate(count_scores[group]):
                 plt.text(j + 1 + (i - (count_group + 1)/2) * width, count, f'{count:.2f}', ha='center', va='bottom')
             i += 1
-        plt.xticks(range(1, 6))
+
+        x_ticks = range(1, 6)
+        x_labels = ['0-20', '21-40', '41-60', '61-80', '81-100']
+        plt.xticks (ticks=x_ticks, labels=x_labels)
 
     plt.xlabel('Оценка')
     plt.ylabel('Кол-во студентов')
+    what_to_analyze = 'СТ' if is_ST else 'ШТ'
+    who_to_analyze = 'групп' if is_group else 'годов'
     plt.title(f'Кол-во оценок за {what_to_analyze} {ST_name} у {who_to_analyze} \n{", ".join(who_to_analyze_list)}')
-    plt.legend()
+    plt.legend(bbox_to_anchor=(1, 1))
     plt.show()
