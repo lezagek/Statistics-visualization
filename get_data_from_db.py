@@ -116,7 +116,7 @@ def get_marks_groups_one_ST(name_ST, groups):
     cursor = conn.cursor()
 
     for group in groups:
-        query = '''SELECT test_mark
+        query = '''SELECT test_mark, test_template_bar
                     FROM testing_session
                     LEFT JOIN test USING (testing_session_id)
                     LEFT JOIN student USING (student_id)
@@ -125,9 +125,7 @@ def get_marks_groups_one_ST(name_ST, groups):
                     WHERE testing_session_name = :p_name and group_name = :p_group'''
         cursor.execute(query, {'p_name': name_ST, 'p_group': group})
         
-        marks[group] = []
-        for mark in cursor.fetchall():
-            marks[group].append(mark[0])
+        marks[group] = cursor.fetchall()
     
     conn.commit()
     conn.close()
@@ -142,17 +140,16 @@ def get_marks_groups_one_SHT(num_SHT, groups):
     cursor = conn.cursor()
 
     for group in groups:
-        query = '''SELECT test_mark
-                    FROM test
+        query = '''SELECT test_mark, test_template_bar
+                    FROM testing_session
+                    LEFT JOIN test USING (testing_session_id)
                     LEFT JOIN student USING (student_id)
                     LEFT JOIN subgroup USING (subgroup_id)
                     LEFT JOIN student_group USING (group_id)
-                    WHERE test_template_id = :p_num and group_name = :p_group'''
+                    WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and group_name = :p_group'''
         cursor.execute(query, {'p_num': num_SHT, 'p_group': group})
         
-        marks[group] = []
-        for mark in cursor.fetchall():
-            marks[group].append(mark[0])
+        marks[group] = cursor.fetchall()
     
     conn.commit()
     conn.close()
@@ -167,18 +164,16 @@ def get_marks_years_one_SHT(num_SHT, years):
     cursor = conn.cursor()
 
     for year in years:
-        query = '''SELECT test_mark
+        query = '''SELECT test_mark, test_template_bar
                     FROM testing_session
                     LEFT JOIN test USING (testing_session_id)
                     LEFT JOIN student USING (student_id)
                     LEFT JOIN subgroup USING (subgroup_id)
                     LEFT JOIN student_group USING (group_id)
-                    WHERE testing_session.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
+                    WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
         cursor.execute(query, {'p_num': num_SHT, 'p_year': year})
         
-        marks[year] = []
-        for mark in cursor.fetchall():
-            marks[year].append(mark[0])
+        marks[year] = cursor.fetchall()
     
     conn.commit()
     conn.close()
@@ -195,7 +190,7 @@ def get_marks_groups_many_ST(name_ST, groups):
     for name in name_ST:
         marks[name] = {}
         for group in groups:
-            query = '''SELECT test_mark
+            query = '''SELECT test_mark, test_template_bar
                         FROM testing_session
                         LEFT JOIN test USING (testing_session_id)
                         LEFT JOIN student USING (student_id)
@@ -204,9 +199,7 @@ def get_marks_groups_many_ST(name_ST, groups):
                         WHERE testing_session_name = :p_name and group_name = :p_group'''
             cursor.execute(query, {'p_name': name, 'p_group': group})
             
-            marks[name][group] = []
-            for mark in cursor.fetchall():
-                marks[name][group].append(mark[0])
+            marks[name][group] = cursor.fetchall()
     
     conn.commit()
     conn.close()
@@ -223,17 +216,16 @@ def get_marks_groups_many_SHT(num_SHT, groups):
     for num in num_SHT:
         marks[num] = {}
         for group in groups:
-            query = '''SELECT test_mark
-                        FROM test
+            query = '''SELECT test_mark, test_template_bar
+                        FROM testing_session
+                        LEFT JOIN test USING (testing_session_id)
                         LEFT JOIN student USING (student_id)
                         LEFT JOIN subgroup USING (subgroup_id)
                         LEFT JOIN student_group USING (group_id)
-                        WHERE test_template_id = :p_num and group_name = :p_group'''
+                        WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and group_name = :p_group'''
             cursor.execute(query, {'p_num': num, 'p_group': group})
             
-            marks[num][group] = []
-            for mark in cursor.fetchall():
-                marks[num][group].append(mark[0])
+            marks[num][group] = cursor.fetchall()
     
     conn.commit()
     conn.close()
@@ -250,18 +242,16 @@ def get_marks_years_many_SHT(num_SHT, years):
     for num in num_SHT:
         marks[num] = {}
         for year in years:
-            query = '''SELECT test_mark
+            query = '''SELECT test_mark, test_template_bar
                         FROM testing_session
                         LEFT JOIN test USING (testing_session_id)
                         LEFT JOIN student USING (student_id)
                         LEFT JOIN subgroup USING (subgroup_id)
                         LEFT JOIN student_group USING (group_id)
-                        WHERE testing_session.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
+                        WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
             cursor.execute(query, {'p_num': num, 'p_year': year})
             
-            marks[num][year] = []
-            for mark in cursor.fetchall():
-                marks[num][year].append(mark[0])
+            marks[num][year] = cursor.fetchall()
     
     conn.commit()
     conn.close()
