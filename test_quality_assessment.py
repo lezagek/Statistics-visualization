@@ -11,9 +11,8 @@ class TestQualityAssessment(tk.Toplevel):
     
     def init_evaluation_of_test_result(self):
         self.title('Оценка качества теста')
-        # self.attributes('-fullscreen', True)
-        # self.geometry('650x450+350+250')
-        # self.resizable(False, False)
+        self.state('zoomed')
+        self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()

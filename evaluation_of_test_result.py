@@ -13,7 +13,7 @@ class EvaluationOfTestResult(tk.Toplevel):
     
     def init_evaluation_of_test_result(self):
         self.title('Оценка результатов тестируемых')
-        self.geometry('650x500+350+250')
+        self.state('zoomed')
         self.resizable(False, False)
 
         self.grab_set()
