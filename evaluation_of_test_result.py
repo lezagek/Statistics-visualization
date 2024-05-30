@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showerror
 
 from vars import *
 from get_data_from_db import *
@@ -21,6 +20,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=3)
         self.grid_columnconfigure(0, weight=2)
         self.grid_columnconfigure(1, weight=1)
 
@@ -34,7 +34,10 @@ class EvaluationOfTestResult(tk.Toplevel):
         choice_frame.grid(row=1, column=0, sticky='wen')
 
         info_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
-        info_frame.grid(row=1, column=1, sticky='en', padx=10)
+        info_frame.grid(row=1, column=2, sticky='en', padx=10)
+
+        warning_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
+        # warning_frame.grid(row=2, column=0, sticky='wn', padx=10)
 
         tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
 
@@ -91,6 +94,7 @@ class EvaluationOfTestResult(tk.Toplevel):
             view_label.grid_forget()
             view_combobox.grid_forget()
             btn_analyze.grid_forget()
+            warning_frame.grid_forget()
 
 
         # После выбора что выводить выводится следующий виджет
@@ -228,6 +232,11 @@ class EvaluationOfTestResult(tk.Toplevel):
             btn_group.grid(row=7, column=0, sticky='w')
             btn_year.grid(row=7, column=1, sticky='w')
 
+            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+                btn_year['state'] = 'disabled'
+            elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+                btn_year['state'] = 'normal'
+
 
         number_to_analyze_ST_label  = tk.Label(choice_frame, text='Выберите СТ')
         number_to_analyze_SHT_label  = tk.Label(choice_frame, text='Выберите ШТ')
@@ -288,6 +297,11 @@ class EvaluationOfTestResult(tk.Toplevel):
             who_to_analyze_label.grid(row=6, column=0, sticky='w')
             btn_group.grid(row=7, column=0, sticky='w')
             btn_year.grid(row=7, column=1, sticky='w')
+
+            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+                btn_year['state'] = 'disabled'
+            elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+                btn_year['state'] = 'normal'
 
 
         # Добавление в listbox выбранных СТ
@@ -462,33 +476,29 @@ class EvaluationOfTestResult(tk.Toplevel):
             cur_view.set('')
             reset_group_year_vars()
             
-            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
-                who_to_analyze_frame.grid_forget()
-                showerror(parent=self, title='Ошибка', message='Выбрать года можно только для ШТ')
-            else:
-                who_to_analyze_frame.grid(row=8, column=0, columnspan=2, sticky='w')
+            who_to_analyze_frame.grid(row=8, column=0, columnspan=2, sticky='w')
 
-                year_label.grid(row=0, column=0, sticky='w')
-                frame_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
-                year_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
-                scroll.config(command=year_listbox.yview)
-                scroll.pack(side=tk.RIGHT, fill=tk.Y)
+            year_label.grid(row=0, column=0, sticky='w')
+            frame_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
+            year_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+            scroll.config(command=year_listbox.yview)
+            scroll.pack(side=tk.RIGHT, fill=tk.Y)
 
-                btn_add_year.grid(row=1, column=1, sticky='w', padx=5)
-                btn_del_year.grid(row=2, column=1, sticky='w', padx=5)
+            btn_add_year.grid(row=1, column=1, sticky='w', padx=5)
+            btn_del_year.grid(row=2, column=1, sticky='w', padx=5)
 
-                year_selected_label.grid(row=0, column=2, sticky='w')
-                frame_selected_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
-                year_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
-                scroll_selected.config(command=year_selected_listbox.yview)
-                scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
+            year_selected_label.grid(row=0, column=2, sticky='w')
+            frame_selected_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
+            year_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
+            scroll_selected.config(command=year_selected_listbox.yview)
+            scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
-                if 'ОДНОМУ' in cur_draw.get():
-                    # Вызов метода по получению годов из бд, в которые проходили ШТ. Передаётся номер ШТ
-                    year_var.set(get_years_SHT(cur_number_analyze.get()))
-                
-                elif 'НЕСКОЛЬКИМ' in cur_draw.get():
-                    year_var.set(get_years_SHT(SHT_selected_var.get()))
+            if 'ОДНОМУ' in cur_draw.get():
+                # Вызов метода по получению годов из бд, в которые проходили ШТ. Передаётся номер ШТ
+                year_var.set(get_years_SHT(cur_number_analyze.get()))
+            
+            elif 'НЕСКОЛЬКИМ' in cur_draw.get():
+                year_var.set(get_years_SHT(SHT_selected_var.get()))
 
 
         who_to_analyze_label = tk.Label(choice_frame, text='Кого анализировать')
@@ -650,6 +660,24 @@ class EvaluationOfTestResult(tk.Toplevel):
         view_combobox = ttk.Combobox(choice_frame, textvariable=cur_view, width=30)
 
 
+        # Проверка, проходил(а) ли группа/год СТ/ШТ
+        def check_null_marks(marks, is_ST, is_group):
+            what_to_analyze = 'СТ' if is_ST else 'ШТ'
+            who_to_analyze = 'не проходила' if is_group else 'не проходил'
+
+            warning_frame.grid(row=2, column=0, sticky='wn', padx=10)
+            warning_label['text'] = ''
+            text_list = []
+
+            for ST in marks:
+                for group in marks[ST]:
+                    if len(marks[ST][group]) == 0:
+                        text_list.append(f'{group} {who_to_analyze} {what_to_analyze} {ST}')
+
+            if len(text_list) != 0:
+                warning_label['text'] = '\n'.join(text_list)
+
+
         def get_params_to_display(is_one):
             if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
                 is_ST = True
@@ -686,6 +714,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
                 case '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
+                    check_null_marks(marks, is_ST, is_group)
                     passed_many_st(marks, is_ST, is_group, cur_view.get())
 
                 case 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ':
@@ -695,6 +724,7 @@ class EvaluationOfTestResult(tk.Toplevel):
                     
                 case 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
+                    check_null_marks(marks, is_ST, is_group)
                     avg_score_many_st(marks, is_ST, is_group, cur_view.get())
                     
                 case 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ':
@@ -705,6 +735,8 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         btn_analyze = tk.Button(choice_frame, text='Показать', command=display_graphs)
 
+        warning_label = tk.Label(warning_frame, bg='#D9D9D9', fg='#CC0000')
+        warning_label.grid(row=0, column=0, sticky='w')
 
         # Очистка всех виджетов
         def del_all():
