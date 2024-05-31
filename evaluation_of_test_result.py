@@ -37,7 +37,6 @@ class EvaluationOfTestResult(tk.Toplevel):
         info_frame.grid(row=1, column=2, sticky='en', padx=10)
 
         warning_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
-        # warning_frame.grid(row=2, column=0, sticky='wn', padx=10)
 
         tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
 
@@ -266,13 +265,13 @@ class EvaluationOfTestResult(tk.Toplevel):
         scroll_number_selected = tk.Scrollbar(frame_selected_number_listbox, orient=tk.VERTICAL)
 
         # listbox для выбора СТ
-        ST_listbox = tk.Listbox(frame_number_listbox, listvariable=ST_var, selectmode=tk.EXTENDED, height=5)
+        ST_listbox = tk.Listbox(frame_number_listbox, listvariable=ST_var, selectmode=tk.EXTENDED, height=5, width=30)
         ST_listbox.config(yscrollcommand=scroll_number.set)
 
         # listbox для выбранных СТ
         ST_selected_label = tk.Label(number_to_analyze_frame, text='Выбранные СТ')
         ST_selected_var = tk.Variable(value=[])
-        ST_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=ST_selected_var, selectmode=tk.EXTENDED, height=5)
+        ST_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=ST_selected_var, selectmode=tk.EXTENDED, height=5, width=30)
         ST_selected_listbox.config(yscrollcommand=scroll_number_selected.set)
 
         # listbox для выбора ШТ
@@ -447,14 +446,14 @@ class EvaluationOfTestResult(tk.Toplevel):
                 # Заполнение данными в зависимости от выбора, что анализировать
                 if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
                     # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся название СТ
-                    group_var.set(get_groups_ST(cur_number_analyze.get()))
+                    group_var.set(get_groups_ST([cur_number_analyze.get()]))
                 elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                     # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся номер ШТ
-                    group_var.set(get_groups_SHT(cur_number_analyze.get()))
+                    group_var.set(get_groups_SHT([cur_number_analyze.get()]))
             
             elif 'НЕСКОЛЬКИМ' in cur_draw.get():
                 if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
-                    group_var.set(get_groups_ST(ST_selected_var.get()))
+                    group_var.set(get_groups_ST((ST_selected_var.get())))
                 elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                     group_var.set(get_groups_SHT(SHT_selected_var.get()))
 
@@ -495,7 +494,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             if 'ОДНОМУ' in cur_draw.get():
                 # Вызов метода по получению годов из бд, в которые проходили ШТ. Передаётся номер ШТ
-                year_var.set(get_years_SHT(cur_number_analyze.get()))
+                year_var.set(get_years_SHT([cur_number_analyze.get()]))
             
             elif 'НЕСКОЛЬКИМ' in cur_draw.get():
                 year_var.set(get_years_SHT(SHT_selected_var.get()))
