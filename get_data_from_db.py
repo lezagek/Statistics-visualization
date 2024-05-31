@@ -62,6 +62,7 @@ def get_groups_ST(name_ST):
     return sorted(list(groups))
 
 # Получение названий групп, которые проходили конкретные ШТ
+# Берутся данные через таблицу testing_session, пока не связаны test и test_template
 def get_groups_SHT(num_SHT):
     groups = set()
 
@@ -70,11 +71,12 @@ def get_groups_SHT(num_SHT):
 
     for SHT in num_SHT:
         query = '''SELECT DISTINCT group_name
-                    FROM test
+                    FROM testing_session
+                    LEFT JOIN test USING (testing_session_id)
                     LEFT JOIN student USING (student_id)
                     LEFT JOIN subgroup USING (subgroup_id)
                     LEFT JOIN student_group USING (group_id)
-                    WHERE test_template_id = :p_num'''
+                    WHERE testing_session.test_template_id = :p_num'''
         cursor.execute(query, {'p_num': SHT})
 
         for name in cursor.fetchall():
@@ -133,6 +135,7 @@ def get_marks_groups_one_ST(name_ST, groups):
     return marks
 
 # Получение оценок у групп по одному ШТ
+# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_groups_one_SHT(num_SHT, groups):
     marks = {}
 
@@ -146,7 +149,7 @@ def get_marks_groups_one_SHT(num_SHT, groups):
                     LEFT JOIN student USING (student_id)
                     LEFT JOIN subgroup USING (subgroup_id)
                     LEFT JOIN student_group USING (group_id)
-                    WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and group_name = :p_group'''
+                    WHERE testing_session.test_template_id = :p_num and group_name = :p_group'''
         cursor.execute(query, {'p_num': num_SHT, 'p_group': group})
         
         marks[group] = cursor.fetchall()
@@ -157,6 +160,7 @@ def get_marks_groups_one_SHT(num_SHT, groups):
     return marks
 
 # Получение оценок у годов по одному ШТ
+# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_years_one_SHT(num_SHT, years):
     marks = {}
 
@@ -170,7 +174,7 @@ def get_marks_years_one_SHT(num_SHT, years):
                     LEFT JOIN student USING (student_id)
                     LEFT JOIN subgroup USING (subgroup_id)
                     LEFT JOIN student_group USING (group_id)
-                    WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
+                    WHERE testing_session.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
         cursor.execute(query, {'p_num': num_SHT, 'p_year': year})
         
         marks[year] = cursor.fetchall()
@@ -207,6 +211,7 @@ def get_marks_groups_many_ST(name_ST, groups):
     return marks
 
 # Получение оценок у групп по нескольким ШТ
+# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_groups_many_SHT(num_SHT, groups):
     marks = {}
 
@@ -222,7 +227,7 @@ def get_marks_groups_many_SHT(num_SHT, groups):
                         LEFT JOIN student USING (student_id)
                         LEFT JOIN subgroup USING (subgroup_id)
                         LEFT JOIN student_group USING (group_id)
-                        WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and group_name = :p_group'''
+                        WHERE testing_session.test_template_id = :p_num and group_name = :p_group'''
             cursor.execute(query, {'p_num': num, 'p_group': group})
             
             marks[num][group] = cursor.fetchall()
@@ -233,6 +238,7 @@ def get_marks_groups_many_SHT(num_SHT, groups):
     return marks
 
 # Получение оценок у годов по нескольким ШТ
+# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_years_many_SHT(num_SHT, years):
     marks = {}
 
@@ -248,7 +254,7 @@ def get_marks_years_many_SHT(num_SHT, years):
                         LEFT JOIN student USING (student_id)
                         LEFT JOIN subgroup USING (subgroup_id)
                         LEFT JOIN student_group USING (group_id)
-                        WHERE testing_session.test_template_id = :p_num and test.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
+                        WHERE testing_session.test_template_id = :p_num and strftime('%Y', testing_session_date) = :p_year'''
             cursor.execute(query, {'p_num': num, 'p_year': year})
             
             marks[num][year] = cursor.fetchall()
