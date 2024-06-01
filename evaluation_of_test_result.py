@@ -241,7 +241,7 @@ class EvaluationOfTestResult(tk.Toplevel):
         number_to_analyze_SHT_label  = tk.Label(choice_frame, text='Выберите ШТ')
 
         cur_number_analyze = tk.StringVar()
-        number_to_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=30)
+        number_to_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=40)
         number_to_analyze_combobox.bind('<<ComboboxSelected>>', bind_number_to_analyze)
 
         # Фрэйм для красивого вывода при выборе нескольких СТ/ШТ
@@ -265,13 +265,13 @@ class EvaluationOfTestResult(tk.Toplevel):
         scroll_number_selected = tk.Scrollbar(frame_selected_number_listbox, orient=tk.VERTICAL)
 
         # listbox для выбора СТ
-        ST_listbox = tk.Listbox(frame_number_listbox, listvariable=ST_var, selectmode=tk.EXTENDED, height=5, width=30)
+        ST_listbox = tk.Listbox(frame_number_listbox, listvariable=ST_var, selectmode=tk.EXTENDED, height=5, width=40)
         ST_listbox.config(yscrollcommand=scroll_number.set)
 
         # listbox для выбранных СТ
         ST_selected_label = tk.Label(number_to_analyze_frame, text='Выбранные СТ')
         ST_selected_var = tk.Variable(value=[])
-        ST_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=ST_selected_var, selectmode=tk.EXTENDED, height=5, width=30)
+        ST_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=ST_selected_var, selectmode=tk.EXTENDED, height=5, width=40)
         ST_selected_listbox.config(yscrollcommand=scroll_number_selected.set)
 
         # listbox для выбора ШТ
@@ -445,15 +445,23 @@ class EvaluationOfTestResult(tk.Toplevel):
             if 'ОДНОМУ' in cur_draw.get():
                 # Заполнение данными в зависимости от выбора, что анализировать
                 if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
-                    # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся название СТ
-                    group_var.set(get_groups_ST([cur_number_analyze.get()]))
+                    ST_id = cur_number_analyze.get()
+                    ST_id = ST_id[ST_id.find('(') + 1 : ST_id.find(')')]
+                    # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся id СТ
+                    group_var.set(get_groups_ST([ST_id]))
+
                 elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
-                    # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся номер ШТ
+                    # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся id ШТ
                     group_var.set(get_groups_SHT([cur_number_analyze.get()]))
             
             elif 'НЕСКОЛЬКИМ' in cur_draw.get():
                 if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
-                    group_var.set(get_groups_ST((ST_selected_var.get())))
+                    ST_id_list = []
+                    for ST in ST_selected_var.get():
+                        ST_id = ST[ST.find('(') + 1 : ST.find(')')]
+                        ST_id_list.append(ST_id)
+
+                    group_var.set(get_groups_ST(ST_id_list))
                 elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                     group_var.set(get_groups_SHT(SHT_selected_var.get()))
 
@@ -682,9 +690,17 @@ class EvaluationOfTestResult(tk.Toplevel):
                 is_ST = True
                 is_group = True
                 if is_one:
-                    marks = get_marks_groups_one_ST(cur_number_analyze.get(), group_selected_var.get())
+                    ST_id = cur_number_analyze.get()
+                    ST_id = ST_id[ST_id.find('(') + 1 : ST_id.find(')')]
+
+                    marks = get_marks_groups_one_ST(ST_id, group_selected_var.get())
                 else:
-                    marks = get_marks_groups_many_ST(ST_selected_var.get(), group_selected_var.get())
+                    ST_id_list = []
+                    for ST in ST_selected_var.get():
+                        ST_id = ST[ST.find('(') + 1 : ST.find(')')]
+                        ST_id_list.append(ST_id)
+
+                    marks = get_marks_groups_many_ST(ST_id_list, group_selected_var.get())
             
             elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
                 is_ST = False
@@ -714,7 +730,13 @@ class EvaluationOfTestResult(tk.Toplevel):
                 case '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
                     check_null_marks(marks, is_ST, is_group)
-                    passed_many_st(marks, is_ST, is_group, cur_view.get())
+                    if is_ST:
+                        names = ST_selected_var.get()
+                    else:
+                        names = []
+                        for SHT in SHT_selected_var.get():
+                            names.append(str(SHT))
+                    passed_many_st(names, marks, is_ST, is_group, cur_view.get())
 
                 case 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
@@ -724,7 +746,13 @@ class EvaluationOfTestResult(tk.Toplevel):
                 case 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
                     check_null_marks(marks, is_ST, is_group)
-                    avg_score_many_st(marks, is_ST, is_group, cur_view.get())
+                    if is_ST:
+                        names = ST_selected_var.get()
+                    else:
+                        names = []
+                        for SHT in SHT_selected_var.get():
+                            names.append(str(SHT))
+                    avg_score_many_st(names, marks, is_ST, is_group, cur_view.get())
                     
                 case 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
