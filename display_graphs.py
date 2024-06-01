@@ -47,17 +47,15 @@ def passed_one_st(ST_name, marks, is_ST, is_group, is_graph):
 
 
 # % УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ
-def passed_many_st(marks, is_ST, is_group, view):
+def passed_many_st(ST_name, marks, is_ST, is_group, view):
     passed_many_st_vis = {}
     who_to_analyze_set = set()
     count_ST = 0
-    ST_name = []
 
     # Проходимся по каждому СТ/ШТ
     for ST in marks:
         passed_many_st_vis[ST] = []
         count_ST += 1
-        ST_name.append(str(ST))
 
         # Проходимся по каждой группе/году
         for group in marks[ST]:
@@ -121,7 +119,7 @@ def passed_many_st(marks, is_ST, is_group, view):
     
     what_to_analyze = 'СТ' if is_ST else 'ШТ'
     who_to_analyze = 'групп' if is_group else 'годов'
-    plt.title(f'% успешно пройденных {what_to_analyze} {", ".join(ST_name)} у {who_to_analyze} \n{", ".join(who_to_analyze_set)}')
+    plt.title(f'% успешно пройденных {what_to_analyze} {", ".join(ST_name)} у {who_to_analyze} \n{", ".join(sorted(list(who_to_analyze_set)))}')
     plt.show()
 
 
@@ -164,17 +162,15 @@ def avg_score_one_st(ST_name, marks, is_ST, is_group, is_graph):
 
 
 # СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ
-def avg_score_many_st(marks, is_ST, is_group, view):
+def avg_score_many_st(ST_name, marks, is_ST, is_group, view):
     avg_score_many_st_vis = {}
     who_to_analyze_set = set()
     count_ST = 0
-    ST_name = []
 
     # Проходимся по каждому СТ/ШТ
     for ST in marks:
         avg_score_many_st_vis[ST] = []
         count_ST += 1
-        ST_name.append(str(ST))
 
         # Проходимся по каждой группе/году
         for group in marks[ST]:
@@ -234,7 +230,7 @@ def avg_score_many_st(marks, is_ST, is_group, view):
 
     what_to_analyze = 'СТ' if is_ST else 'ШТ'
     who_to_analyze = 'групп' if is_group else 'годов'
-    plt.title(f'Средняя оценка за {what_to_analyze} {", ".join(ST_name)} у {who_to_analyze} \n{", ".join(who_to_analyze_set)}')
+    plt.title(f'Средняя оценка за {what_to_analyze} {", ".join(ST_name)} у {who_to_analyze} \n{", ".join(sorted(list(who_to_analyze_set)))}')
     plt.show()
 
 
