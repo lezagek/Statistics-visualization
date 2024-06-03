@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+import pandas as pd
+import numpy as np
+
 from vars import *
 from get_data_from_db import *
 
@@ -19,6 +22,9 @@ class TestQualityAssessment(tk.Toplevel):
 
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=2)
+        self.grid_rowconfigure(3, weight=2)
+        self.grid_rowconfigure(4, weight=1)
         self.grid_columnconfigure(0, weight=2)
         self.grid_columnconfigure(1, weight=1)
 
@@ -28,13 +34,32 @@ class TestQualityAssessment(tk.Toplevel):
         btn_back = tk.Button(back_frame, text='Назад', command=lambda: self.destroy())
         btn_back.grid()
 
+        # Фрэйм для выбора параметров
         choice_frame = tk.Frame(self, bd=10)
         choice_frame.grid(row=1, column=0, sticky='wen')
 
-        info_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
-        info_frame.grid(row=1, column=1, sticky='en', padx=10)
+        # Фрэйм для подсказки
+        help_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
+        help_frame.grid(row=1, column=1, sticky='en', padx=10)
 
-        tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
+        # Фрэйм для изначальной таблицы
+        table_frame = tk.Frame(self, bd=10)
+        table_frame.grid(row=2, column=0, sticky='wen')
+
+        # Фрэйм для отсортированной таблицы
+        sorted_table_frame = tk.Frame(self, bd=10)
+        sorted_table_frame.grid(row=3, column=0, sticky='wen')
+
+        # Фрэйм для рекомендаций
+        info_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
+        info_frame.grid(row=2, rowspan=2, column=1, sticky='wen', padx=10, pady=10)
+
+        # Фрэйм для итога
+        result_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
+        result_frame.grid(row=4, column=0, columnspan=2, sticky='wesn', padx=10, pady=10)
+
+
+        tk.Label(help_frame, text='строки - студенты \nстолбцы - шаблоны тестовых заданий', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
 
 
         # После выбора что анализировать выводится следующий виджет
@@ -69,17 +94,147 @@ class TestQualityAssessment(tk.Toplevel):
 
         # После выбора какой ст/шт анализировать выводится кнопка
         def bind_number_to_analyze(event):
-            btn_analyze.grid(row=2, column=0, sticky='w', pady=5)
+            btn_analyze.grid(row=2, column=0, sticky='w', padx=5, pady=5)
 
 
-        number_to_analyze_ST_label  = tk.Label(choice_frame, text='Выберите СТ')
-        number_to_analyze_SHT_label  = tk.Label(choice_frame, text='Выберите ШТ')
+        number_to_analyze_ST_label  = tk.Label(choice_frame, text='Выберите сеанс тестирования')
+        number_to_analyze_SHT_label  = tk.Label(choice_frame, text='Выберите шаблон тестирования')
 
         cur_number_analyze = tk.StringVar()
-        number_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=30)
+        number_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=40)
         number_analyze_combobox.bind('<<ComboboxSelected>>', bind_number_to_analyze)
 
-        btn_analyze = tk.Button(choice_frame, text='Анализировать')
+
+        def analyze():
+            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+                ST_id = cur_number_analyze.get()
+                ST_id = ST_id[ST_id.find('(') + 1 : ST_id.find(')')]
+                marks = get_marks_ST(ST_id)
+                data = {}
+                tasks = set()
+                ind = ''
+
+                for mark in marks:
+                    if mark[0] != ind:
+                        data[mark[0]] = []
+                        ind = mark[0]
+                        
+                    data[mark[0]].append(round(mark[1], 2))
+                    tasks.add(mark[2])
+                
+                tasks = sorted(list(tasks))
+
+                print(data)
+                print(tasks)
+
+                df = pd.DataFrame(data=data, index=tasks)
+                df.loc['Xi'] = (df.sum())
+                df = df.T
+                df.loc['Ri'] = (df.sum())
+                df.loc['Ri', 'Xi'] = np.nan
+                print(df)
+
+                # Создание таблицы
+                tree = ttk.Treeview(table_frame)
+                tree['columns'] = tuple(df.columns)
+
+                # Вертикальный скролл
+                vert_scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+                vert_scrollbar.pack(side="right", fill="y")
+                tree.configure(yscrollcommand=vert_scrollbar.set)
+
+                # Горизонтальный скролл
+                horiz_scrollbar = ttk.Scrollbar(table_frame, orient="horizontal", command=tree.xview)
+                horiz_scrollbar.pack(side="bottom", fill="x")
+                tree.configure(xscrollcommand=horiz_scrollbar.set)
+
+                # Добавление заголовков столбцов
+                tree.column('#0', width=40, anchor='c')
+                for col in df.columns:
+                    tree.column(col, width=50, anchor='e')
+                tree.heading('#0', text='')
+                for col in df.columns:
+                    tree.heading(col, text=col)
+
+                # Заполнение таблицы данными из DataFrame с округлением
+                for index, row in df.iterrows():
+                    values = []
+                    for value in row:
+                        if isinstance(value, (int, float)):
+                            value = round(value, 3)
+                            values.append(str(value))
+                        else:
+                            values.append(str(value))
+                    tree.insert('', 'end', text=str(index), values=tuple(values))
+
+                # Размещение таблицы и скроллбаров в окне
+                tree.pack(side="left", fill="both", expand=True)
+                vert_scrollbar.pack(side="right", fill="y")
+                horiz_scrollbar.pack(side="bottom", fill="x")
+
+
+                df.loc['Wj'] = (10 - df.loc['Ri'])
+                df.loc['pj'] = (df.loc['Ri'] / 10)
+                df.loc['qj'] = (1 - df.loc['pj'])
+                df.loc['pjqj'] = (df.loc['pj'] * df.loc['qj'])
+
+                # Сортировка столбцов по убыванию значений в строке Ri
+                df = df.sort_values('Ri', axis=1, ascending=False)
+                # Сортировка строк по убыванию значений в столбце Xi
+                df = df.sort_values('Xi', ascending=False)
+
+                df = df.fillna('')
+                print(df)
+
+
+                # Создание отсортированной таблицы
+                sorted_tree = ttk.Treeview(sorted_table_frame)
+                sorted_tree['columns'] = tuple(df.columns)
+
+                # Вертикальный скролл
+                sorted_vert_scrollbar = ttk.Scrollbar(sorted_table_frame, orient="vertical", command=sorted_tree.yview)
+                sorted_vert_scrollbar.pack(side="right", fill="y")
+                sorted_tree.configure(yscrollcommand=sorted_vert_scrollbar.set)
+
+                # Горизонтальный скролл
+                sorted_horiz_scrollbar = ttk.Scrollbar(sorted_table_frame, orient="horizontal", command=sorted_tree.xview)
+                sorted_horiz_scrollbar.pack(side="bottom", fill="x")
+                sorted_tree.configure(xscrollcommand=sorted_horiz_scrollbar.set)
+
+                # Добавление заголовков столбцов
+                sorted_tree.column('#0', width=40, anchor='c')
+                for col in df.columns:
+                    sorted_tree.column(col, width=50, anchor='e')
+                sorted_tree.heading('#0', text='')
+                for col in df.columns:
+                    sorted_tree.heading(col, text=col)
+
+                # Заполнение таблицы данными из DataFrame с округлением
+                for index, row in df.iterrows():
+                    values = []
+                    for value in row:
+                        if isinstance(value, (int, float)):
+                            value = round(value, 3)
+                            values.append(str(value))
+                        else:
+                            values.append(str(value))
+                    sorted_tree.insert('', 'end', text=str(index), values=tuple(values))
+
+                # Размещение таблицы и скроллбаров в окне
+                sorted_tree.pack(side="left", fill="both", expand=True)
+                sorted_vert_scrollbar.pack(side="right", fill="y")
+                sorted_horiz_scrollbar.pack(side="bottom", fill="x")
+
+                tk.Label(result_frame, text='ИТОГ', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
+                tk.Label(result_frame, text='Следует пересмотреть', bg='#D9D9D9').grid(row=1, column=0, sticky='w')
+
+
+
+            elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+                pass
+
+
+        btn_analyze = tk.Button(choice_frame, text='Анализировать', command=analyze)
 
 
         # Очистка всех виджетов
@@ -95,22 +250,3 @@ class TestQualityAssessment(tk.Toplevel):
 
         btn_del = tk.Button(choice_frame, text='Очистить', command=del_all)
         btn_del.grid(row=2, column=1, sticky='w', padx=5, pady=5)
-
-
-        # Тестовая таблица
-        frame = tk.Frame(self, bd=10)
-        frame.grid(row=2, column=0, sticky='wen')
-
-        # Создание и настройка виджета Treeview для отображения таблицы
-        table = ttk.Treeview(frame, columns=('A Scores', 'B Scores'))
-        table.heading('#0', text='Index')
-        table.heading('A Scores', text='A Scores')
-        table.heading('B Scores', text='B Scores')
-        
-        # Вставка данных в таблицу
-        data = [[100, 95], [90, 85], [80, 75], [90, 95]]
-        for i, (a_score, b_score) in enumerate(data, start=1):
-            table.insert('', 'end', text=str(i), values=(a_score, b_score))
-        
-        # Упаковка виджета Treeview и запуск главного цикла Tkinter
-        table.pack(expand=True, fill=tk.BOTH)
