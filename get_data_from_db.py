@@ -6,12 +6,12 @@ def get_ST():
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    query = '''SELECT testing_session_name 
+    query = '''SELECT testing_session_name, testing_session_id
                 FROM testing_session'''
     cursor.execute(query)
 
     for name in cursor.fetchall():
-        ST.append(name[0])
+        ST.append(f'{name[0]} ({name[1]})')
     
     conn.commit()
     conn.close()
@@ -37,21 +37,21 @@ def get_SHT():
     return SHT
 
 # Получение названий групп, которые проходили конкретные СТ
-def get_groups_ST(name_ST):
+def get_groups_ST(id_ST):
     groups = set()
 
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    for ST in name_ST:
+    for ST in id_ST:
         query = '''SELECT DISTINCT group_name
                     FROM testing_session
                     LEFT JOIN test USING (testing_session_id)
                     LEFT JOIN student USING (student_id)
                     LEFT JOIN subgroup USING (subgroup_id)
                     LEFT JOIN student_group USING (group_id)
-                    WHERE testing_session_name = :p_name'''
-        cursor.execute(query, {'p_name': ST})
+                    WHERE testing_session_id = :p_id'''
+        cursor.execute(query, {'p_id': ST})
 
         for name in cursor.fetchall():
             groups.add(name[0])
@@ -111,7 +111,7 @@ def get_years_SHT(num_SHT):
 
 
 # Получение оценок у групп по одному СТ
-def get_marks_groups_one_ST(name_ST, groups):
+def get_marks_groups_one_ST(id_ST, groups):
     marks = {}
 
     conn = sqlite3.connect('db.sqlite')
@@ -124,8 +124,8 @@ def get_marks_groups_one_ST(name_ST, groups):
                     LEFT JOIN student USING (student_id)
                     LEFT JOIN subgroup USING (subgroup_id)
                     LEFT JOIN student_group USING (group_id)
-                    WHERE testing_session_name = :p_name and group_name = :p_group'''
-        cursor.execute(query, {'p_name': name_ST, 'p_group': group})
+                    WHERE testing_session_id = :p_id and group_name = :p_group'''
+        cursor.execute(query, {'p_id': id_ST, 'p_group': group})
         
         marks[group] = cursor.fetchall()
     
@@ -185,14 +185,14 @@ def get_marks_years_one_SHT(num_SHT, years):
     return marks
 
 # Получение оценок у групп по нескольким СТ
-def get_marks_groups_many_ST(name_ST, groups):
+def get_marks_groups_many_ST(id_ST, groups):
     marks = {}
 
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    for name in name_ST:
-        marks[name] = {}
+    for id in id_ST:
+        marks[id] = {}
         for group in groups:
             query = '''SELECT test_mark, test_template_bar
                         FROM testing_session
@@ -200,10 +200,10 @@ def get_marks_groups_many_ST(name_ST, groups):
                         LEFT JOIN student USING (student_id)
                         LEFT JOIN subgroup USING (subgroup_id)
                         LEFT JOIN student_group USING (group_id)
-                        WHERE testing_session_name = :p_name and group_name = :p_group'''
-            cursor.execute(query, {'p_name': name, 'p_group': group})
+                        WHERE testing_session_id = :p_id and group_name = :p_group'''
+            cursor.execute(query, {'p_id': id, 'p_group': group})
             
-            marks[name][group] = cursor.fetchall()
+            marks[id][group] = cursor.fetchall()
     
     conn.commit()
     conn.close()
@@ -258,6 +258,29 @@ def get_marks_years_many_SHT(num_SHT, years):
             cursor.execute(query, {'p_num': num, 'p_year': year})
             
             marks[num][year] = cursor.fetchall()
+    
+    conn.commit()
+    conn.close()
+
+    return marks
+
+
+# Получение оценок за ШТЗ в СТ (анализ качества)
+def get_marks_ST(id_ST):
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+
+    query = '''SELECT student_id, task_score, task_template_id
+                FROM testing_session
+                LEFT JOIN test USING (testing_session_id)
+                LEFT JOIN ' task' USING (test_id)
+                LEFT JOIN student USING (student_id)
+                WHERE testing_session_id = :p_id
+                ORDER BY student_id, task_template_id'''
+    cursor.execute(query, {'p_id': id_ST})
+
+    marks = cursor.fetchall()
+    print(marks)
     
     conn.commit()
     conn.close()
