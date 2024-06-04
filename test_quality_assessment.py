@@ -33,13 +33,12 @@ class TestQualityAssessment(tk.Toplevel):
         back_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
         back_frame.grid(row=0, column=0, columnspan=2, sticky='we')
 
-
         # Загрузка изображения и присвоение к back_label
         back_photo = ImageTk.PhotoImage(Image.open("Кнопки/Назад.png"))
         back_label = tk.Label(back_frame, bg='#FFFFFF')
         back_label.image = back_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         back_label.configure(image=back_photo)
-        back_label.grid(sticky='we', pady=10)
+        back_label.grid()
 
         # Привязываем событие нажатия на картинку к вызову self.destroy()
         back_label.bind('<Button-1>', lambda event: self.destroy())
