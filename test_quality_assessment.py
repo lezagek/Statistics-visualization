@@ -124,7 +124,7 @@ class TestQualityAssessment(tk.Toplevel):
         number_to_analyze_ST_label.image = number_to_analyze_ST_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         number_to_analyze_ST_label.configure(image=number_to_analyze_ST_photo)
 
-        # Загрузка изображения и присвоение к number_to_analyze_ST_label
+        # Загрузка изображения и присвоение к number_to_analyze_SHT_label
         number_to_analyze_SHT_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_шаблон_тестирования.png"))
         number_to_analyze_SHT_label = tk.Label(choice_frame, bg='#FFFFFF')
         number_to_analyze_SHT_label.image = number_to_analyze_SHT_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
