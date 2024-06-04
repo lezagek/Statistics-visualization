@@ -287,3 +287,23 @@ def get_marks_ST(id_ST):
     conn.close()
 
     return marks
+
+# Получение данных студентов по их id (анализ качества)
+def get_stud(id_stud):
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+
+    query = '''SELECT student_name, group_name, subgroup_num
+                FROM student
+                LEFT JOIN subgroup USING (subgroup_id)
+                LEFT JOIN student_group USING (group_id)
+                WHERE student_id = :p_id'''
+    cursor.execute(query, {'p_id': id_stud})
+
+    stud = cursor.fetchall()
+    print(stud)
+    
+    conn.commit()
+    conn.close()
+
+    return stud
