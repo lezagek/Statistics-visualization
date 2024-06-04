@@ -45,8 +45,6 @@ class EvaluationOfTestResult(tk.Toplevel):
         info_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
         info_frame.grid(row=1, column=2, sticky='en', padx=10)
 
-        warning_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
-
         # Загрузка изображения и присвоение к info_label
         info_photo = ImageTk.PhotoImage(Image.open("Текст/Инфо.png"))
         info_label = tk.Label(info_frame, bg='#FFFFFF')
@@ -110,7 +108,6 @@ class EvaluationOfTestResult(tk.Toplevel):
             view_label.grid_forget()
             view_combobox.grid_forget()
             analyze_label.grid_forget()
-            warning_frame.grid_forget()
 
 
         # После выбора что выводить выводится следующий виджет
@@ -808,21 +805,29 @@ class EvaluationOfTestResult(tk.Toplevel):
 
 
         # Проверка, проходил(а) ли группа/год СТ/ШТ
-        def check_null_marks(marks, is_ST, is_group):
-            what_to_analyze = 'СТ' if is_ST else 'ШТ'
-            who_to_analyze = 'не проходила' if is_group else 'не проходил'
-
-            warning_frame.grid(row=2, column=0, sticky='wn', padx=10)
-            warning_label['text'] = ''
-            text_list = []
+        def check_null_marks(marks):
+            group_ST = {}
+            res_list = []
 
             for ST in marks:
                 for group in marks[ST]:
+                    if group not in group_ST:
+                        group_ST[group] = []
+                    # Если группа/год не проходила СТ/ШТ, то записываем номер
                     if len(marks[ST][group]) == 0:
-                        text_list.append(f'{group} {who_to_analyze} {what_to_analyze} {ST}')
+                        group_ST[group].append(ST)
 
-            if len(text_list) != 0:
-                warning_label['text'] = '\n'.join(text_list)
+            for group in group_ST:
+                if len(group_ST[group]) == 0:
+                    res_list.append(group)
+                else:
+                    ST_list = []
+                    for ST in group_ST[group]:
+                        ST_list.append(str(ST))
+                    res_list.append(f'{group} (не пройден {", ".join(ST_list)})')
+
+
+            return ", ".join(res_list)
 
 
         def get_params_to_display(is_one):
@@ -869,14 +874,14 @@ class EvaluationOfTestResult(tk.Toplevel):
 
                 case '% успешно пройденных по нескольким СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
-                    check_null_marks(marks, is_ST, is_group)
+                    group_text = check_null_marks(marks)
                     if is_ST:
                         names = ST_selected_var.get()
                     else:
                         names = []
                         for SHT in SHT_selected_var.get():
                             names.append(str(SHT))
-                    passed_many_st(names, marks, is_ST, is_group, cur_view.get())
+                    passed_many_st(names, marks, is_ST, is_group, cur_view.get(), group_text)
 
                 case 'Средняя оценка по одному СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
@@ -885,14 +890,14 @@ class EvaluationOfTestResult(tk.Toplevel):
                     
                 case 'Средняя оценка по нескольким СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
-                    check_null_marks(marks, is_ST, is_group)
+                    group_text = check_null_marks(marks)
                     if is_ST:
                         names = ST_selected_var.get()
                     else:
                         names = []
                         for SHT in SHT_selected_var.get():
                             names.append(str(SHT))
-                    avg_score_many_st(names, marks, is_ST, is_group, cur_view.get())
+                    avg_score_many_st(names, marks, is_ST, is_group, cur_view.get(), group_text)
                     
                 case 'Кол-во оценок по одному СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
@@ -909,8 +914,6 @@ class EvaluationOfTestResult(tk.Toplevel):
         # Привязываем событие нажатия на картинку к вызову display_graphs
         analyze_label.bind('<Button-1>', lambda event: display_graphs())
 
-        warning_label = tk.Label(warning_frame, bg='#D9D9D9', fg='#CC0000')
-        warning_label.grid(row=0, column=0, sticky='w')
 
         # Очистка всех виджетов
         def del_all():
