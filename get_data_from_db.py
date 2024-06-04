@@ -270,11 +270,12 @@ def get_marks_ST(id_ST):
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    query = '''SELECT student_id, task_score, task_template_id
+    query = '''SELECT student_id, task_score, task_template_id, task_template_difficulty
                 FROM testing_session
                 LEFT JOIN test USING (testing_session_id)
                 LEFT JOIN ' task' USING (test_id)
                 LEFT JOIN student USING (student_id)
+                LEFT JOIN task_template USING (task_template_id)
                 WHERE testing_session_id = :p_id
                 ORDER BY student_id, task_template_id'''
     cursor.execute(query, {'p_id': id_ST})
