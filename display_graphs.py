@@ -83,7 +83,7 @@ def passed_many_st(ST_name, marks, is_ST, is_group, view):
     fig.set_size_inches(10,5)
     
     match view:
-        case 'ГРАФИК':
+        case 'График':
             for ST in passed_many_st_vis:
                 plt.plot(range(len(passed_many_st_vis[ST])), passed_many_st_vis[ST], marker='o', label=f'{ST}')
 
@@ -96,7 +96,7 @@ def passed_many_st(ST_name, marks, is_ST, is_group, view):
             plt.ylabel('%')
             plt.legend(bbox_to_anchor=(1, 1))
 
-        case 'ДИАГРАММА':
+        case 'Диаграмма':
             i = 1
             for ST in passed_many_st_vis:
                 plt.bar(ind + (i - (count_ST + 1)/2) * width, passed_many_st_vis[ST], width, label=f'{ST}')
@@ -112,7 +112,7 @@ def passed_many_st(ST_name, marks, is_ST, is_group, view):
             plt.ylabel('%')
             plt.legend(bbox_to_anchor=(1, 1))
 
-        case 'ТАБЛИЦА':
+        case 'Таблица':
             ax.axis('off')
             df = pd.DataFrame.from_dict(passed_many_st_vis)
             ax.table(cellText=df.values, colLabels=df.columns, rowLabels=sorted(list(who_to_analyze_set)), loc='center')
@@ -194,7 +194,7 @@ def avg_score_many_st(ST_name, marks, is_ST, is_group, view):
     fig.set_size_inches(10,5)
 
     match view:
-        case 'ГРАФИК':
+        case 'График':
             for ST in avg_score_many_st_vis:
                 plt.plot(range(len(avg_score_many_st_vis[ST])), avg_score_many_st_vis[ST], marker='o', label=f'{ST}')
 
@@ -207,7 +207,7 @@ def avg_score_many_st(ST_name, marks, is_ST, is_group, view):
             plt.ylabel('Средняя оценка')
             plt.legend(bbox_to_anchor=(1, 1))
 
-        case 'ДИАГРАММА':
+        case 'Диаграмма':
             i = 1
             for ST in avg_score_many_st_vis:
                 plt.bar(ind + (i - (count_ST + 1)/2) * width, avg_score_many_st_vis[ST], width, label=f'{ST}')
@@ -222,7 +222,7 @@ def avg_score_many_st(ST_name, marks, is_ST, is_group, view):
             plt.ylabel('Средняя оценка')
             plt.legend(bbox_to_anchor=(1, 1))
 
-        case 'ТАБЛИЦА':
+        case 'Таблица':
             ax.axis('off')
             df = pd.DataFrame.from_dict(avg_score_many_st_vis)
             df = df.fillna('-')
