@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, font
+from PIL import Image, ImageTk
 
 from vars import *
 from get_data_from_db import *
@@ -14,6 +15,7 @@ class EvaluationOfTestResult(tk.Toplevel):
         self.title('Оценка результатов тестируемых')
         self.state('zoomed')
         self.resizable(False, False)
+        self.config(bg='#FFFFFF')
 
         self.grab_set()
         self.focus_set()
@@ -24,21 +26,36 @@ class EvaluationOfTestResult(tk.Toplevel):
         self.grid_columnconfigure(0, weight=2)
         self.grid_columnconfigure(1, weight=1)
 
-        back_frame = tk.Frame(self, bd=10)
+        back_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
         back_frame.grid(row=0, column=0, columnspan=2, sticky='we')
 
-        btn_back = tk.Button(back_frame, text='Назад', command=lambda: self.destroy())
-        btn_back.grid()
+        # Загрузка изображения и присвоение к back_label
+        back_photo = ImageTk.PhotoImage(Image.open("Кнопки/Назад.png"))
+        back_label = tk.Label(back_frame, bg='#FFFFFF')
+        back_label.image = back_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        back_label.configure(image=back_photo)
+        back_label.grid()
 
-        choice_frame = tk.Frame(self, bd=10)
+        # Привязываем событие нажатия на картинку к вызову self.destroy()
+        back_label.bind('<Button-1>', lambda event: self.destroy())
+
+        choice_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
         choice_frame.grid(row=1, column=0, sticky='wen')
 
-        info_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
+        info_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
         info_frame.grid(row=1, column=2, sticky='en', padx=10)
 
         warning_frame = tk.Frame(self, bd=10, bg='#D9D9D9')
 
-        tk.Label(info_frame, text='СТ - СЕАНС ТЕСТИРОВАНИЯ \nШТ - ШАБЛОН ТЕСТА', bg='#D9D9D9').grid(row=0, column=0, sticky='w')
+        # Загрузка изображения и присвоение к info_label
+        info_photo = ImageTk.PhotoImage(Image.open("Текст/Инфо.png"))
+        info_label = tk.Label(info_frame, bg='#FFFFFF')
+        info_label.image = info_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        info_label.configure(image=info_photo)
+        info_label.grid(row=0, column=0, sticky='w')
+
+        # Создаем пользовательский шрифт
+        custom_font = font.Font(family="Golos", size=12)
 
         # Сброс переменных для выбора групп и годов
         def reset_group_year_vars():
@@ -62,13 +79,13 @@ class EvaluationOfTestResult(tk.Toplevel):
             number_to_analyze_frame.grid_forget()
             ST_label.grid_forget()
             frame_number_listbox.grid_forget()
-            btn_add_ST.grid_forget()
-            btn_del_ST.grid_forget()
+            add_ST_label.grid_forget()
+            del_ST_label.grid_forget()
             ST_selected_label.grid_forget()
             frame_selected_number_listbox.grid_forget()
             SHT_label.grid_forget()
-            btn_add_SHT.grid_forget()
-            btn_del_SHT.grid_forget()
+            add_SHT_label.grid_forget()
+            del_SHT_label.grid_forget()
             SHT_selected_label.grid_forget()
         
         # Сокрытие виджетов для выбора какие группы/года анализировать
@@ -83,16 +100,16 @@ class EvaluationOfTestResult(tk.Toplevel):
             group_selected_label.grid_forget()
             year_selected_label.grid_forget()
             frame_selected_listbox.grid_forget()
-            btn_add_group.grid_forget()
-            btn_del_group.grid_forget()
-            btn_add_year.grid_forget()
-            btn_del_year.grid_forget()
+            add_group_label.grid_forget()
+            del_group_label.grid_forget()
+            add_year_label.grid_forget()
+            del_year_label.grid_forget()
         
         # Сокрытие виджетов для выбора вида и кнопки Показать
         def del_view():
             view_label.grid_forget()
             view_combobox.grid_forget()
-            btn_analyze.grid_forget()
+            analyze_label.grid_forget()
             warning_frame.grid_forget()
 
 
@@ -107,16 +124,20 @@ class EvaluationOfTestResult(tk.Toplevel):
             reset_group_year_vars()
             reset_ST_SHT_vars()
 
-            what_to_analyze_label.grid(row=2, column=0, sticky='w')
+            what_to_analyze_label.grid(row=2, column=0, sticky='w', pady=5)
             analyze_combobox.grid(row=3, column=0, columnspan=2, sticky='w')
 
 
-        what_to_draw_label = tk.Label(choice_frame, text='Что вывести')
-        what_to_draw_label.grid(row=0, column=0, sticky='w')
+        # Загрузка изображения и присвоение к what_to_draw_label
+        what_to_draw_photo = ImageTk.PhotoImage(Image.open("Текст/Что_вывести.png"))
+        what_to_draw_label = tk.Label(choice_frame, bg='#FFFFFF')
+        what_to_draw_label.image = what_to_draw_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        what_to_draw_label.configure(image=what_to_draw_photo)
+        what_to_draw_label.grid(row=0, column=0, sticky='w', pady=5)
 
         cur_draw = tk.StringVar()
-        draw_values = ['% УСПЕШНО ПРОЙДЕННЫХ ПО ОДНОМУ СТ/ШТ', '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ', 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ', 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ', 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ']
-        draw_combobox = ttk.Combobox(choice_frame, textvariable=cur_draw, width=52, values=draw_values)
+        draw_values = ['% успешно пройденных по одному СТ/ШТ', '% успешно пройденных по нескольким СТ/ШТ', 'Средняя оценка по одному СТ/ШТ', 'Средняя оценка по нескольким СТ/ШТ', 'Кол-во оценок по одному СТ/ШТ']
+        draw_combobox = ttk.Combobox(choice_frame, textvariable=cur_draw, width=50, values=draw_values, font=custom_font)
         draw_combobox.grid(row=1, column=0, columnspan=2, sticky='w')
         draw_combobox.bind('<<ComboboxSelected>>', bind_what_to_draw)
 
@@ -131,7 +152,7 @@ class EvaluationOfTestResult(tk.Toplevel):
             reset_group_year_vars()
             reset_ST_SHT_vars()
 
-            if 'ОДНОМУ' in cur_draw.get():
+            if 'одному' in cur_draw.get():
                 number_to_analyze_frame.grid_forget()
                 number_to_analyze_ST_label.grid_forget()
                 number_to_analyze_SHT_label.grid_forget()
@@ -139,82 +160,86 @@ class EvaluationOfTestResult(tk.Toplevel):
                 number_to_analyze_combobox.grid(row=5, column=0, columnspan=2, sticky='w')
 
                 # Заполнение данными в зависимости от выбора, что анализировать
-                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
-                    number_to_analyze_ST_label.grid(row=4, column=0, sticky='w')
+                if cur_analyze.get() == 'Сеанс тестирования':
+                    number_to_analyze_ST_label.grid(row=4, column=0, sticky='w', pady=5)
                     number_to_analyze_combobox['values'] = get_ST()
 
-                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
-                    number_to_analyze_SHT_label.grid(row=4, column=0, sticky='w')
+                elif cur_analyze.get() == 'Шаблон тестирования':
+                    number_to_analyze_SHT_label.grid(row=4, column=0, sticky='w', pady=5)
                     number_to_analyze_combobox['values'] = get_SHT()
                 
 
-            elif 'НЕСКОЛЬКИМ' in cur_draw.get():
+            elif 'нескольким' in cur_draw.get():
                 number_to_analyze_ST_label.grid_forget()
                 number_to_analyze_SHT_label.grid_forget()
                 number_to_analyze_combobox.grid_forget()
 
                 number_to_analyze_frame.grid(row=4, column=0, sticky='w')
 
-                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+                if cur_analyze.get() == 'Сеанс тестирования':
                     SHT_label.grid_forget()
                     SHT_listbox.pack_forget()
                     frame_number_listbox.grid_forget()
-                    btn_add_SHT.grid_forget()
-                    btn_del_SHT.grid_forget()
+                    add_SHT_label.grid_forget()
+                    del_SHT_label.grid_forget()
                     SHT_selected_label.grid_forget()
                     SHT_selected_listbox.pack_forget()
                     frame_selected_number_listbox.grid_forget()
 
                     ST_var.set(get_ST())
                     
-                    ST_label.grid(row=0, column=0, sticky='w')
+                    ST_label.grid(row=0, column=0, sticky='w', pady=5)
                     frame_number_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
                     ST_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
                     scroll_number.config(command=ST_listbox.yview)
                     scroll_number.pack(side=tk.RIGHT, fill=tk.Y)
 
-                    btn_add_ST.grid(row=1, column=1, sticky='w', padx=5)
-                    btn_del_ST.grid(row=2, column=1, sticky='w', padx=5)
+                    add_ST_label.grid(row=1, column=1, sticky='w', padx=10)
+                    del_ST_label.grid(row=2, column=1, sticky='w', padx=10)
 
-                    ST_selected_label.grid(row=0, column=2, sticky='w')
+                    ST_selected_label.grid(row=0, column=2, sticky='w', pady=5)
                     frame_selected_number_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
                     ST_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
                     scroll_number_selected.config(command=ST_selected_listbox.yview)
                     scroll_number_selected.pack(side=tk.RIGHT, fill=tk.Y)
                 
-                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+                elif cur_analyze.get() == 'Шаблон тестирования':
                     ST_label.grid_forget()
                     ST_listbox.pack_forget()
                     frame_number_listbox.grid_forget()
-                    btn_add_ST.grid_forget()
-                    btn_del_ST.grid_forget()
+                    add_ST_label.grid_forget()
+                    del_ST_label.grid_forget()
                     ST_selected_label.grid_forget()
                     ST_selected_listbox.pack_forget()
                     frame_selected_number_listbox.grid_forget()
 
                     SHT_var.set(get_SHT())
 
-                    SHT_label.grid(row=0, column=0, sticky='w')
+                    SHT_label.grid(row=0, column=0, sticky='w', pady=5)
                     frame_number_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
                     SHT_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
                     scroll_number.config(command=SHT_listbox.yview)
                     scroll_number.pack(side=tk.RIGHT, fill=tk.Y)
 
-                    btn_add_SHT.grid(row=1, column=1, sticky='w', padx=5)
-                    btn_del_SHT.grid(row=2, column=1, sticky='w', padx=5)
+                    add_SHT_label.grid(row=1, column=1, sticky='w', padx=10)
+                    del_SHT_label.grid(row=2, column=1, sticky='w', padx=10)
 
-                    SHT_selected_label.grid(row=0, column=2, sticky='w')
+                    SHT_selected_label.grid(row=0, column=2, sticky='w', pady=5)
                     frame_selected_number_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
                     SHT_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
                     scroll_number_selected.config(command=SHT_selected_listbox.yview)
                     scroll_number_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
 
-        what_to_analyze_label = tk.Label(choice_frame, text='Что анализировать')
+        # Загрузка изображения и присвоение к what_to_analyze_label
+        what_to_analyze_photo = ImageTk.PhotoImage(Image.open("Текст/Что_анализировать.png"))
+        what_to_analyze_label = tk.Label(choice_frame, bg='#FFFFFF')
+        what_to_analyze_label.image = what_to_analyze_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        what_to_analyze_label.configure(image=what_to_analyze_photo)
 
         cur_analyze = tk.StringVar()
-        analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_analyze, width=30)
-        analyze_combobox['values'] = ['СЕАНС ТЕСТИРОВАНИЯ', 'ШАБЛОН ТЕСТИРОВАНИЯ']
+        analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_analyze, width=25, font=custom_font)
+        analyze_combobox['values'] = ['Сеанс тестирования', 'Шаблон тестирования']
         analyze_combobox.bind('<<ComboboxSelected>>', bind_what_to_analyze)
 
 
@@ -227,61 +252,87 @@ class EvaluationOfTestResult(tk.Toplevel):
             reset_group_year_vars()
             reset_ST_SHT_vars()
             
-            who_to_analyze_label.grid(row=6, column=0, sticky='w')
+            who_to_analyze_label.grid(row=6, column=0, sticky='w', pady=5)
             btn_group.grid(row=7, column=0, sticky='w')
             btn_year.grid(row=7, column=1, sticky='w')
 
-            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+            if cur_analyze.get() == 'Сеанс тестирования':
                 btn_year['state'] = 'disabled'
-            elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+            elif cur_analyze.get() == 'Шаблон тестирования':
                 btn_year['state'] = 'normal'
 
 
-        number_to_analyze_ST_label  = tk.Label(choice_frame, text='Выберите СТ')
-        number_to_analyze_SHT_label  = tk.Label(choice_frame, text='Выберите ШТ')
+        # Загрузка изображения и присвоение к number_to_analyze_ST_label
+        number_to_analyze_ST_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_сеанс_тестирования.png"))
+        number_to_analyze_ST_label = tk.Label(choice_frame, bg='#FFFFFF')
+        number_to_analyze_ST_label.image = number_to_analyze_ST_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        number_to_analyze_ST_label.configure(image=number_to_analyze_ST_photo)
+
+        # Загрузка изображения и присвоение к number_to_analyze_SHT_label
+        number_to_analyze_SHT_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_шаблон_тестирования.png"))
+        number_to_analyze_SHT_label = tk.Label(choice_frame, bg='#FFFFFF')
+        number_to_analyze_SHT_label.image = number_to_analyze_SHT_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        number_to_analyze_SHT_label.configure(image=number_to_analyze_SHT_photo)
 
         cur_number_analyze = tk.StringVar()
-        number_to_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=40)
+        number_to_analyze_combobox = ttk.Combobox(choice_frame, textvariable=cur_number_analyze, width=35, font=custom_font)
         number_to_analyze_combobox.bind('<<ComboboxSelected>>', bind_number_to_analyze)
 
         # Фрэйм для красивого вывода при выборе нескольких СТ/ШТ
-        number_to_analyze_frame = tk.Frame(choice_frame)
+        number_to_analyze_frame = tk.Frame(choice_frame, bg='#FFFFFF')
         number_to_analyze_frame.columnconfigure(0, weight=1)
         number_to_analyze_frame.columnconfigure(2, weight=1)
 
-        ST_label = tk.Label(number_to_analyze_frame, text='Выберите СТ')
-        SHT_label = tk.Label(number_to_analyze_frame, text='Выберите ШТ')
+        # Загрузка изображения и присвоение к ST_label
+        ST_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_СТ.png"))
+        ST_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        ST_label.image = ST_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        ST_label.configure(image=ST_photo)
+
+        # Загрузка изображения и присвоение к SHT_label
+        SHT_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_ШТ.png"))
+        SHT_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        SHT_label.image = SHT_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        SHT_label.configure(image=SHT_photo)
 
         ST_var = tk.Variable()
         SHT_var = tk.Variable()
 
         # Фрэймы для вывода listbox с scrollbar
-        frame_number_listbox = tk.Frame(number_to_analyze_frame)
+        frame_number_listbox = tk.Frame(number_to_analyze_frame, bg='#FFFFFF')
         frame_number_listbox.columnconfigure(0, weight=1)
         scroll_number = tk.Scrollbar(frame_number_listbox, orient=tk.VERTICAL)
         
-        frame_selected_number_listbox = tk.Frame(number_to_analyze_frame)
+        frame_selected_number_listbox = tk.Frame(number_to_analyze_frame, bg='#FFFFFF')
         frame_selected_number_listbox.columnconfigure(0, weight=1)
         scroll_number_selected = tk.Scrollbar(frame_selected_number_listbox, orient=tk.VERTICAL)
 
         # listbox для выбора СТ
-        ST_listbox = tk.Listbox(frame_number_listbox, listvariable=ST_var, selectmode=tk.EXTENDED, height=5, width=40)
+        ST_listbox = tk.Listbox(frame_number_listbox, listvariable=ST_var, selectmode=tk.EXTENDED, height=5, width=35, font=custom_font)
         ST_listbox.config(yscrollcommand=scroll_number.set)
 
+        # Загрузка изображения и присвоение к ST_selected_label
+        ST_selected_photo = ImageTk.PhotoImage(Image.open("Текст/Выбранные_СТ.png"))
+        ST_selected_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        ST_selected_label.image = ST_selected_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        ST_selected_label.configure(image=ST_selected_photo)
         # listbox для выбранных СТ
-        ST_selected_label = tk.Label(number_to_analyze_frame, text='Выбранные СТ')
         ST_selected_var = tk.Variable(value=[])
-        ST_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=ST_selected_var, selectmode=tk.EXTENDED, height=5, width=40)
+        ST_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=ST_selected_var, selectmode=tk.EXTENDED, height=5, width=35, font=custom_font)
         ST_selected_listbox.config(yscrollcommand=scroll_number_selected.set)
 
         # listbox для выбора ШТ
-        SHT_listbox = tk.Listbox(frame_number_listbox, listvariable=SHT_var, selectmode=tk.EXTENDED, height=5)
+        SHT_listbox = tk.Listbox(frame_number_listbox, listvariable=SHT_var, selectmode=tk.EXTENDED, height=5, font=custom_font)
         SHT_listbox.config(yscrollcommand=scroll_number.set)
 
+        # Загрузка изображения и присвоение к SHT_selected_label
+        SHT_selected_photo = ImageTk.PhotoImage(Image.open("Текст/Выбранные_ШТ.png"))
+        SHT_selected_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        SHT_selected_label.image = SHT_selected_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        SHT_selected_label.configure(image=SHT_selected_photo)
         # listbox для выбранных ШТ
-        SHT_selected_label = tk.Label(number_to_analyze_frame, text='Выбранные ШТ')
         SHT_selected_var = tk.Variable(value=[])
-        SHT_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=SHT_selected_var, selectmode=tk.EXTENDED, height=5)
+        SHT_selected_listbox = tk.Listbox(frame_selected_number_listbox, listvariable=SHT_selected_var, selectmode=tk.EXTENDED, height=5, font=custom_font)
         SHT_selected_listbox.config(yscrollcommand=scroll_number_selected.set)
 
 
@@ -293,13 +344,13 @@ class EvaluationOfTestResult(tk.Toplevel):
             cur_view.set('')
             reset_group_year_vars()
             
-            who_to_analyze_label.grid(row=6, column=0, sticky='w')
+            who_to_analyze_label.grid(row=6, column=0, sticky='w', pady=5)
             btn_group.grid(row=7, column=0, sticky='w')
             btn_year.grid(row=7, column=1, sticky='w')
 
-            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+            if cur_analyze.get() == 'Сеанс тестирования':
                 btn_year['state'] = 'disabled'
-            elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+            elif cur_analyze.get() == 'Шаблон тестирования':
                 btn_year['state'] = 'normal'
 
 
@@ -400,11 +451,42 @@ class EvaluationOfTestResult(tk.Toplevel):
 
 
         # Кнопки для выбора СТ
-        btn_add_ST = tk.Button(number_to_analyze_frame, text='>>', command=add_selected_ST)
-        btn_del_ST = tk.Button(number_to_analyze_frame, text='<<', command=del_selected_ST)
+        # Загрузка изображения и присвоение к add_ST_label
+        add_ST_photo = ImageTk.PhotoImage(Image.open("Кнопки/Добавить.png"))
+        add_ST_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        add_ST_label.image = add_ST_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        add_ST_label.configure(image=add_ST_photo)
+
+        # Привязываем событие нажатия на картинку к вызову add_selected_ST
+        add_ST_label.bind('<Button-1>', lambda event: add_selected_ST())
+
+        # Загрузка изображения и присвоение к del_ST_label
+        del_ST_photo = ImageTk.PhotoImage(Image.open("Кнопки/Удалить.png"))
+        del_ST_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        del_ST_label.image = del_ST_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        del_ST_label.configure(image=del_ST_photo)
+
+        # Привязываем событие нажатия на картинку к вызову del_selected_ST
+        del_ST_label.bind('<Button-1>', lambda event: del_selected_ST())
+
         # Кнопки для выбора ШТ
-        btn_add_SHT = tk.Button(number_to_analyze_frame, text='>>', command=add_selected_SHT)
-        btn_del_SHT = tk.Button(number_to_analyze_frame, text='<<', command=del_selected_SHT)
+        # Загрузка изображения и присвоение к add_SHT_label
+        add_SHT_photo = ImageTk.PhotoImage(Image.open("Кнопки/Добавить.png"))
+        add_SHT_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        add_SHT_label.image = add_SHT_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        add_SHT_label.configure(image=add_SHT_photo)
+
+        # Привязываем событие нажатия на картинку к вызову add_selected_SHT
+        add_SHT_label.bind('<Button-1>', lambda event: add_selected_SHT())
+
+        # Загрузка изображения и присвоение к del_SHT_label
+        del_SHT_photo = ImageTk.PhotoImage(Image.open("Кнопки/Удалить.png"))
+        del_SHT_label = tk.Label(number_to_analyze_frame, bg='#FFFFFF')
+        del_SHT_label.image = del_SHT_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        del_SHT_label.configure(image=del_SHT_photo)
+
+        # Привязываем событие нажатия на картинку к вызову del_selected_SHT
+        del_SHT_label.bind('<Button-1>', lambda event: del_selected_SHT())
 
 
         # Если выбраны группы
@@ -415,10 +497,10 @@ class EvaluationOfTestResult(tk.Toplevel):
             year_selected_label.grid_forget()
             year_selected_listbox.pack_forget()
             frame_selected_listbox.grid_forget()
-            btn_add_group.grid_forget()
-            btn_del_group.grid_forget()
-            btn_add_year.grid_forget()
-            btn_del_year.grid_forget()
+            add_group_label.grid_forget()
+            del_group_label.grid_forget()
+            add_year_label.grid_forget()
+            del_year_label.grid_forget()
 
             del_view()
 
@@ -427,42 +509,42 @@ class EvaluationOfTestResult(tk.Toplevel):
 
             who_to_analyze_frame.grid(row=8, column=0, columnspan=2, sticky='w')
 
-            group_label.grid(row=0, column=0, sticky='w')
+            group_label.grid(row=0, column=0, sticky='w', pady=5)
             frame_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
             group_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
             scroll.config(command=group_listbox.yview)
             scroll.pack(side=tk.RIGHT, fill=tk.Y)
 
-            btn_add_group.grid(row=1, column=1, sticky='w', padx=5)
-            btn_del_group.grid(row=2, column=1, sticky='w', padx=5)
+            add_group_label.grid(row=1, column=1, sticky='w', padx=10)
+            del_group_label.grid(row=2, column=1, sticky='w', padx=10)
 
-            group_selected_label.grid(row=0, column=2, sticky='w')
+            group_selected_label.grid(row=0, column=2, sticky='w', pady=5)
             frame_selected_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
             group_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
             scroll_selected.config(command=group_selected_listbox.yview)
             scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
-            if 'ОДНОМУ' in cur_draw.get():
+            if 'одному' in cur_draw.get():
                 # Заполнение данными в зависимости от выбора, что анализировать
-                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+                if cur_analyze.get() == 'Сеанс тестирования':
                     ST_id = cur_number_analyze.get()
                     ST_id = ST_id[ST_id.find('(') + 1 : ST_id.find(')')]
                     # Вызов метода по получению групп из бд, которые проходили СТ. Передаётся id СТ
                     group_var.set(get_groups_ST([ST_id]))
 
-                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+                elif cur_analyze.get() == 'Шаблон тестирования':
                     # Вызов метода по получению групп из бд, которые проходили ШТ. Передаётся id ШТ
                     group_var.set(get_groups_SHT([cur_number_analyze.get()]))
             
-            elif 'НЕСКОЛЬКИМ' in cur_draw.get():
-                if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+            elif 'нескольким' in cur_draw.get():
+                if cur_analyze.get() == 'Сеанс тестирования':
                     ST_id_list = []
                     for ST in ST_selected_var.get():
                         ST_id = ST[ST.find('(') + 1 : ST.find(')')]
                         ST_id_list.append(ST_id)
 
                     group_var.set(get_groups_ST(ST_id_list))
-                elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+                elif cur_analyze.get() == 'Шаблон тестирования':
                     group_var.set(get_groups_SHT(SHT_selected_var.get()))
 
         # Если выбраны года
@@ -473,10 +555,10 @@ class EvaluationOfTestResult(tk.Toplevel):
             group_selected_label.grid_forget()
             group_selected_listbox.pack_forget()
             frame_selected_listbox.grid_forget()
-            btn_add_group.grid_forget()
-            btn_del_group.grid_forget()
-            btn_add_year.grid_forget()
-            btn_del_year.grid_forget()
+            add_group_label.grid_forget()
+            del_group_label.grid_forget()
+            add_year_label.grid_forget()
+            del_year_label.grid_forget()
 
             del_view()
 
@@ -485,87 +567,108 @@ class EvaluationOfTestResult(tk.Toplevel):
             
             who_to_analyze_frame.grid(row=8, column=0, columnspan=2, sticky='w')
 
-            year_label.grid(row=0, column=0, sticky='w')
+            year_label.grid(row=0, column=0, sticky='w', pady=5)
             frame_listbox.grid(row=1, rowspan=2, column=0, sticky='w')
             year_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
             scroll.config(command=year_listbox.yview)
             scroll.pack(side=tk.RIGHT, fill=tk.Y)
 
-            btn_add_year.grid(row=1, column=1, sticky='w', padx=5)
-            btn_del_year.grid(row=2, column=1, sticky='w', padx=5)
+            add_year_label.grid(row=1, column=1, sticky='w', padx=10)
+            del_year_label.grid(row=2, column=1, sticky='w', padx=10)
 
-            year_selected_label.grid(row=0, column=2, sticky='w')
+            year_selected_label.grid(row=0, column=2, sticky='w', pady=5)
             frame_selected_listbox.grid(row=1, rowspan=2, column=2, sticky='w')
             year_selected_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
             scroll_selected.config(command=year_selected_listbox.yview)
             scroll_selected.pack(side=tk.RIGHT, fill=tk.Y)
 
-            if 'ОДНОМУ' in cur_draw.get():
+            if 'одному' in cur_draw.get():
                 # Вызов метода по получению годов из бд, в которые проходили ШТ. Передаётся номер ШТ
                 year_var.set(get_years_SHT([cur_number_analyze.get()]))
             
-            elif 'НЕСКОЛЬКИМ' in cur_draw.get():
+            elif 'нескольким' in cur_draw.get():
                 year_var.set(get_years_SHT(SHT_selected_var.get()))
 
 
-        who_to_analyze_label = tk.Label(choice_frame, text='Кого анализировать')
+        # Загрузка изображения и присвоение к who_to_analyze_label
+        who_to_analyze_photo = ImageTk.PhotoImage(Image.open("Текст/Кого_анализировать.png"))
+        who_to_analyze_label = tk.Label(choice_frame, bg='#FFFFFF')
+        who_to_analyze_label.image = who_to_analyze_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        who_to_analyze_label.configure(image=who_to_analyze_photo)
         
         selected_who_to_analyze = tk.StringVar()
-        btn_group = tk.Radiobutton(choice_frame, text='Группы', value='Группы', variable=selected_who_to_analyze, command=select_group)
-        btn_year = tk.Radiobutton(choice_frame, text='Года', value='Года', variable=selected_who_to_analyze, command=select_year)
+        btn_group = tk.Radiobutton(choice_frame, bg='#FFFFFF', text='Группы', value='Группы', variable=selected_who_to_analyze, command=select_group, font=custom_font)
+        btn_year = tk.Radiobutton(choice_frame, bg='#FFFFFF', text='Года', value='Года', variable=selected_who_to_analyze, command=select_year, font=custom_font)
 
         # Фрэйм для красивого вывода
-        who_to_analyze_frame = tk.Frame(choice_frame)
+        who_to_analyze_frame = tk.Frame(choice_frame, bg='#FFFFFF')
         who_to_analyze_frame.columnconfigure(0, weight=1)
         who_to_analyze_frame.columnconfigure(2, weight=1)
 
-        group_label = tk.Label(who_to_analyze_frame, text='Выберите группы')
-        year_label = tk.Label(who_to_analyze_frame, text='Выберите года')
+        # Загрузка изображения и присвоение к group_label
+        group_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_группы.png"))
+        group_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        group_label.image = group_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        group_label.configure(image=group_photo)
+
+        # Загрузка изображения и присвоение к year_label
+        year_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_года.png"))
+        year_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        year_label.image = year_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        year_label.configure(image=year_photo)
 
         group_var = tk.Variable()
         year_var = tk.Variable()
 
         # Фрэймы для вывода listbox с scrollbar
-        frame_listbox = tk.Frame(who_to_analyze_frame)
+        frame_listbox = tk.Frame(who_to_analyze_frame, bg='#FFFFFF')
         frame_listbox.columnconfigure(0, weight=1)
         scroll = tk.Scrollbar(frame_listbox, orient=tk.VERTICAL)
         
-        frame_selected_listbox = tk.Frame(who_to_analyze_frame)
+        frame_selected_listbox = tk.Frame(who_to_analyze_frame, bg='#FFFFFF')
         frame_selected_listbox.columnconfigure(0, weight=1)
         scroll_selected = tk.Scrollbar(frame_selected_listbox, orient=tk.VERTICAL)
 
         # listbox для выбора групп
-        group_listbox = tk.Listbox(frame_listbox, listvariable=group_var, selectmode=tk.EXTENDED, height=5)
+        group_listbox = tk.Listbox(frame_listbox, listvariable=group_var, selectmode=tk.EXTENDED, height=5, font=custom_font)
         group_listbox.config(yscrollcommand=scroll.set)
 
+        # Загрузка изображения и присвоение к group_selected_label
+        group_selected_photo = ImageTk.PhotoImage(Image.open("Текст/Выбранные_группы.png"))
+        group_selected_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        group_selected_label.image = group_selected_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        group_selected_label.configure(image=group_selected_photo)
         # listbox для выбранных групп
-        group_selected_label = tk.Label(who_to_analyze_frame, text='Выбранные группы')
         group_selected_var = tk.Variable(value=[])
-        group_selected_listbox = tk.Listbox(frame_selected_listbox, listvariable=group_selected_var, selectmode=tk.EXTENDED, height=5)
+        group_selected_listbox = tk.Listbox(frame_selected_listbox, listvariable=group_selected_var, selectmode=tk.EXTENDED, height=5, font=custom_font)
         group_selected_listbox.config(yscrollcommand=scroll.set)
 
         # listbox для выбора годов
-        year_listbox = tk.Listbox(frame_listbox, listvariable=year_var, selectmode=tk.EXTENDED, height=5)
+        year_listbox = tk.Listbox(frame_listbox, listvariable=year_var, selectmode=tk.EXTENDED, height=5, font=custom_font)
         year_listbox.config(yscrollcommand=scroll.set)
 
+        # Загрузка изображения и присвоение к year_selected_label
+        year_selected_photo = ImageTk.PhotoImage(Image.open("Текст/Выбранные_года.png"))
+        year_selected_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        year_selected_label.image = year_selected_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        year_selected_label.configure(image=year_selected_photo)
         # listbox для выбранных годов
-        year_selected_label = tk.Label(who_to_analyze_frame, text='Выбранные года')
         year_selected_var = tk.Variable(value=[])
-        year_selected_listbox = tk.Listbox(frame_selected_listbox, listvariable=year_selected_var, selectmode=tk.EXTENDED, height=5)
+        year_selected_listbox = tk.Listbox(frame_selected_listbox, listvariable=year_selected_var, selectmode=tk.EXTENDED, height=5, font=custom_font)
         year_selected_listbox.config(yscrollcommand=scroll.set)
         
         # Показать выбор вида анализа
         def show_view():
             del_view()
-            view_label.grid(row=9, column=0, sticky='w')
-            if 'НЕСКОЛЬКИМ' in cur_draw.get() and 'ТАБЛИЦА' not in values_view_combobox:
-                values_view_combobox.append('ТАБЛИЦА')
-            elif 'ОДНОМУ' in cur_draw.get() and 'ТАБЛИЦА' in values_view_combobox:
-                values_view_combobox.remove('ТАБЛИЦА')
+            view_label.grid(row=9, column=0, sticky='w', pady=5)
+            if 'нескольким' in cur_draw.get() and 'Таблица' not in values_view_combobox:
+                values_view_combobox.append('Таблица')
+            elif 'одному' in cur_draw.get() and 'Таблица' in values_view_combobox:
+                values_view_combobox.remove('Таблица')
 
             view_combobox['values'] = values_view_combobox
             view_combobox.grid(row=10, column=0, sticky='w')
-            btn_analyze.grid(row=11, column=0, sticky='w', pady=5)
+            analyze_label.grid(row=11, column=0, sticky='w', pady=5)
 
 
         # Добавление в listbox выбранных групп
@@ -655,16 +758,53 @@ class EvaluationOfTestResult(tk.Toplevel):
 
 
         # Кнопки для выбора групп
-        btn_add_group = tk.Button(who_to_analyze_frame, text='>>', command=add_selected_group)
-        btn_del_group = tk.Button(who_to_analyze_frame, text='<<', command=del_selected_group)
+        # Загрузка изображения и присвоение к add_group_label
+        add_group_photo = ImageTk.PhotoImage(Image.open("Кнопки/Добавить.png"))
+        add_group_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        add_group_label.image = add_group_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        add_group_label.configure(image=add_group_photo)
+
+        # Привязываем событие нажатия на картинку к вызову add_selected_group
+        add_group_label.bind('<Button-1>', lambda event: add_selected_group())
+
+        # Загрузка изображения и присвоение к del_group_label
+        del_group_photo = ImageTk.PhotoImage(Image.open("Кнопки/Удалить.png"))
+        del_group_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        del_group_label.image = del_group_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        del_group_label.configure(image=del_group_photo)
+
+        # Привязываем событие нажатия на картинку к вызову del_selected_group
+        del_group_label.bind('<Button-1>', lambda event: del_selected_group())
+
         # Кнопки для выбора годов
-        btn_add_year = tk.Button(who_to_analyze_frame, text='>>', command=add_selected_year)
-        btn_del_year = tk.Button(who_to_analyze_frame, text='<<', command=del_selected_year)
-        
-        view_label = tk.Label(choice_frame, text='Вид')
+        # Загрузка изображения и присвоение к add_year_label
+        add_year_photo = ImageTk.PhotoImage(Image.open("Кнопки/Добавить.png"))
+        add_year_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        add_year_label.image = add_year_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        add_year_label.configure(image=add_year_photo)
+
+        # Привязываем событие нажатия на картинку к вызову add_selected_year
+        add_year_label.bind('<Button-1>', lambda event: add_selected_year())
+
+        # Загрузка изображения и присвоение к del_year_label
+        del_year_photo = ImageTk.PhotoImage(Image.open("Кнопки/Удалить.png"))
+        del_year_label = tk.Label(who_to_analyze_frame, bg='#FFFFFF')
+        del_year_label.image = del_year_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        del_year_label.configure(image=del_year_photo)
+
+        # Привязываем событие нажатия на картинку к вызову del_selected_year
+        del_year_label.bind('<Button-1>', lambda event: del_selected_year())
+
+
+        # Загрузка изображения и присвоение к view_label
+        view_photo = ImageTk.PhotoImage(Image.open("Текст/Вид.png"))
+        view_label = tk.Label(choice_frame, bg='#FFFFFF')
+        view_label.image = view_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        view_label.configure(image=view_photo)
+
         cur_view = tk.StringVar()
-        values_view_combobox = ['ГРАФИК', 'ДИАГРАММА']
-        view_combobox = ttk.Combobox(choice_frame, textvariable=cur_view, width=30)
+        values_view_combobox = ['График', 'Диаграмма']
+        view_combobox = ttk.Combobox(choice_frame, textvariable=cur_view, width=25, font=custom_font)
 
 
         # Проверка, проходил(а) ли группа/год СТ/ШТ
@@ -686,7 +826,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
 
         def get_params_to_display(is_one):
-            if cur_analyze.get() == 'СЕАНС ТЕСТИРОВАНИЯ':
+            if cur_analyze.get() == 'Сеанс тестирования':
                 is_ST = True
                 is_group = True
                 if is_one:
@@ -702,7 +842,7 @@ class EvaluationOfTestResult(tk.Toplevel):
 
                     marks = get_marks_groups_many_ST(ST_id_list, group_selected_var.get())
             
-            elif cur_analyze.get() == 'ШАБЛОН ТЕСТИРОВАНИЯ':
+            elif cur_analyze.get() == 'Шаблон тестирования':
                 is_ST = False
                 if selected_who_to_analyze.get() == 'Группы':
                     is_group = True
@@ -722,12 +862,12 @@ class EvaluationOfTestResult(tk.Toplevel):
 
         def display_graphs():
             match cur_draw.get():
-                case '% УСПЕШНО ПРОЙДЕННЫХ ПО ОДНОМУ СТ/ШТ':
+                case '% успешно пройденных по одному СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
-                    is_graph = True if cur_view.get() == 'ГРАФИК' else False
+                    is_graph = True if cur_view.get() == 'График' else False
                     passed_one_st(cur_number_analyze.get(), marks, is_ST, is_group, is_graph)
 
-                case '% УСПЕШНО ПРОЙДЕННЫХ ПО НЕСКОЛЬКИМ СТ/ШТ':
+                case '% успешно пройденных по нескольким СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
                     check_null_marks(marks, is_ST, is_group)
                     if is_ST:
@@ -738,12 +878,12 @@ class EvaluationOfTestResult(tk.Toplevel):
                             names.append(str(SHT))
                     passed_many_st(names, marks, is_ST, is_group, cur_view.get())
 
-                case 'СРЕДНЯЯ ОЦЕНКА ПО ОДНОМУ СТ/ШТ':
+                case 'Средняя оценка по одному СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
-                    is_graph = True if cur_view.get() == 'ГРАФИК' else False
+                    is_graph = True if cur_view.get() == 'График' else False
                     avg_score_one_st(cur_number_analyze.get(), marks, is_ST, is_group, is_graph)
                     
-                case 'СРЕДНЯЯ ОЦЕНКА ПО НЕСКОЛЬКИМ СТ/ШТ':
+                case 'Средняя оценка по нескольким СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(False)
                     check_null_marks(marks, is_ST, is_group)
                     if is_ST:
@@ -754,13 +894,20 @@ class EvaluationOfTestResult(tk.Toplevel):
                             names.append(str(SHT))
                     avg_score_many_st(names, marks, is_ST, is_group, cur_view.get())
                     
-                case 'КОЛ-ВО ОЦЕНОК ПО ОДНОМУ СТ/ШТ':
+                case 'Кол-во оценок по одному СТ/ШТ':
                     marks, is_ST, is_group = get_params_to_display(True)
-                    is_graph = True if cur_view.get() == 'ГРАФИК' else False
+                    is_graph = True if cur_view.get() == 'График' else False
                     count_score_one_st(cur_number_analyze.get(), marks, is_ST, is_group, is_graph)
 
 
-        btn_analyze = tk.Button(choice_frame, text='Показать', command=display_graphs)
+        # Загрузка изображения и присвоение к analyze_label
+        analyze_photo = ImageTk.PhotoImage(Image.open("Кнопки/Показать.png"))
+        analyze_label = tk.Label(choice_frame, bg='#FFFFFF')
+        analyze_label.image = analyze_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        analyze_label.configure(image=analyze_photo)
+
+        # Привязываем событие нажатия на картинку к вызову display_graphs
+        analyze_label.bind('<Button-1>', lambda event: display_graphs())
 
         warning_label = tk.Label(warning_frame, bg='#D9D9D9', fg='#CC0000')
         warning_label.grid(row=0, column=0, sticky='w')
@@ -779,5 +926,12 @@ class EvaluationOfTestResult(tk.Toplevel):
             reset_group_year_vars()
 
 
-        btn_del_all = tk.Button(choice_frame, text='Очистить', command=del_all)
-        btn_del_all.grid(row=11, column=2, padx=5, pady=5)
+        # Загрузка изображения и присвоение к del_label
+        del_photo = ImageTk.PhotoImage(Image.open("Кнопки/Очистить.png"))
+        del_label = tk.Label(choice_frame, bg='#FFFFFF')
+        del_label.image = del_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
+        del_label.configure(image=del_photo)
+        del_label.grid(row=11, column=2, padx=5, pady=5)
+
+        # Привязываем событие нажатия на картинку к вызову del_all
+        del_label.bind('<Button-1>', lambda event: del_all())
