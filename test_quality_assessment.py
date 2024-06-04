@@ -70,7 +70,7 @@ class TestQualityAssessment(tk.Toplevel):
 
 
         # Загрузка изображения и присвоение к help_label
-        help_photo = ImageTk.PhotoImage(Image.open("Кнопки/Подсказка.png"))
+        help_photo = ImageTk.PhotoImage(Image.open("Текст/Подсказка.png"))
         help_label = tk.Label(help_frame, bg='#FFFFFF')
         help_label.image = help_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         help_label.configure(image=help_photo)
@@ -100,7 +100,7 @@ class TestQualityAssessment(tk.Toplevel):
 
 
         # Загрузка изображения и присвоение к what_to_analyze_label
-        what_to_analyze_photo = ImageTk.PhotoImage(Image.open("Кнопки/Что_анализировать.png"))
+        what_to_analyze_photo = ImageTk.PhotoImage(Image.open("Текст/Что_анализировать.png"))
         what_to_analyze_label = tk.Label(choice_frame, bg='#FFFFFF')
         what_to_analyze_label.image = what_to_analyze_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         what_to_analyze_label.configure(image=what_to_analyze_photo)
@@ -119,13 +119,13 @@ class TestQualityAssessment(tk.Toplevel):
 
 
         # Загрузка изображения и присвоение к number_to_analyze_ST_label
-        number_to_analyze_ST_photo = ImageTk.PhotoImage(Image.open("Кнопки/Выберите_сеанс_тестирования.png"))
+        number_to_analyze_ST_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_сеанс_тестирования.png"))
         number_to_analyze_ST_label = tk.Label(choice_frame, bg='#FFFFFF')
         number_to_analyze_ST_label.image = number_to_analyze_ST_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         number_to_analyze_ST_label.configure(image=number_to_analyze_ST_photo)
 
         # Загрузка изображения и присвоение к number_to_analyze_ST_label
-        number_to_analyze_SHT_photo = ImageTk.PhotoImage(Image.open("Кнопки/Выберите_шаблон_тестирования.png"))
+        number_to_analyze_SHT_photo = ImageTk.PhotoImage(Image.open("Текст/Выберите_шаблон_тестирования.png"))
         number_to_analyze_SHT_label = tk.Label(choice_frame, bg='#FFFFFF')
         number_to_analyze_SHT_label.image = number_to_analyze_SHT_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         number_to_analyze_SHT_label.configure(image=number_to_analyze_SHT_photo)
@@ -263,8 +263,6 @@ class TestQualityAssessment(tk.Toplevel):
             elif cur_analyze.get() == 'Шаблон тестирования':
                 pass
 
-
-        # btn_analyze = tk.Button(choice_frame, text='Анализировать', command=analyze)
 
         # Загрузка изображения и присвоение к analyze_label
         analyze_photo = ImageTk.PhotoImage(Image.open("Кнопки/Анализировать.png"))
