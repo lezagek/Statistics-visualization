@@ -23,16 +23,14 @@ class TestQualityAssessment(tk.Toplevel):
         self.focus_set()
 
         self.grid_rowconfigure(0, weight=0)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=2)
-        self.grid_rowconfigure(3, weight=2)
-        self.grid_rowconfigure(4, weight=1)
+        self.grid_rowconfigure(1, weight=0)
+        self.grid_rowconfigure(2, weight=1)
         self.grid_columnconfigure(0, weight=2)
         self.grid_columnconfigure(1, weight=1)
 
         # Создаем пользовательский шрифт
         custom_font = font.Font(family="Golos", size=12)
-
+        
         back_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
         back_frame.grid(row=0, column=0, columnspan=2, sticky='we')
 
@@ -55,28 +53,55 @@ class TestQualityAssessment(tk.Toplevel):
         help_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
         help_frame.grid(row=1, column=1, sticky='en')
 
+
+        def resize_frame(event):
+            # Растягиваем frame на всю площадь canvas
+            canvas.itemconfig(frame_id, width=event.width)
+
+        main_frame = tk.Frame(self, bg='#FFFFFF')
+        main_frame.grid(row=2, column=0, columnspan=2, sticky='wesn')
+
+        canvas = tk.Canvas(main_frame, bd=0, bg="#FFFFFF")
+        frame= tk.Frame(canvas, background="#FFFFFF")
+        vsb = tk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+
+        # Функция привязки изменения размера Canvas
+        canvas.bind('<Configure>', resize_frame)
+
+        frame_id = canvas.create_window((0, 0), window=frame, anchor="nw")
+
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_columnconfigure(1, weight=0)
+
+        
+
         # Фрэйм для изначальной таблицы
-        table_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
+        table_frame = tk.Frame(frame, bd=10, bg='#FFFFFF')
 
         # Фрэйм для отсортированной таблицы
-        sorted_table_frame = tk.Frame(self, bd=10, bg='#FFFFFF')
+        sorted_table_frame = tk.Frame(frame, bd=10, bg='#FFFFFF')
 
         # Фрэйм для рекомендаций
-        info_frame = tk.Frame(self, bd=10)
+        info_frame = tk.Frame(frame, bd=10)
 
         # Текст рекомендаций
         good_stud_label = tk.Label(info_frame, font=custom_font)
         bad_stud_label = tk.Label(info_frame, font=custom_font)
         dif_label = tk.Label(info_frame, font=custom_font)
+        variation_label = tk.Label(info_frame, font=custom_font)
 
         # Фрэйм для итога
-        result_frame = tk.Frame(self, bd=10)
+        result_frame = tk.Frame(frame, bd=10)
 
         # Текст итога
         result_label = tk.Label(result_frame, text='ИТОГ', font=custom_font)
         reconsider_label = tk.Label(result_frame, text='Следует пересмотреть', font=custom_font)
         result_stud_label = tk.Label(result_frame, font=custom_font)
         result_dif_label = tk.Label(result_frame, font=custom_font)
+        result_variation_label = tk.Label(result_frame, font=custom_font)
 
         # Таблицы
         tree = ttk.Treeview(table_frame)
@@ -114,11 +139,13 @@ class TestQualityAssessment(tk.Toplevel):
             good_stud_label.grid_forget()
             bad_stud_label.grid_forget()
             dif_label.grid_forget()
+            variation_label.grid_forget()
             result_frame.grid_forget()
             result_label.grid_forget()
             reconsider_label.grid_forget()
             result_stud_label.grid_forget()
             result_dif_label.grid_forget()
+            result_variation_label.grid_forget()
 
 
         # После выбора что анализировать выводится следующий виджет
@@ -198,6 +225,7 @@ class TestQualityAssessment(tk.Toplevel):
 
                 text_result_stud = ''
                 text_result_dif = ''
+                text_result_var = ''
 
                 for mark in marks:
                     if mark[0] != ind:
@@ -403,7 +431,7 @@ class TestQualityAssessment(tk.Toplevel):
                 print(ind_dif)
 
                 if len(ind_dif) == 1:
-                    dif_label['text'] = f'У шаблона тестового задания {ind_dif[0][0]} следует изменить сложность (с {ind_dif[0][1]} на [{round(ind_dif[0][2] - 0.1, 2)}, {round(ind_dif[0][2] + 0.1, 2)}])'
+                    dif_label['text'] = f'У шаблона тестового задания {ind_dif[0][0]} \nследует изменить сложность (с {ind_dif[0][1]} на [{round(ind_dif[0][2] - 0.1, 2)}, {round(ind_dif[0][2] + 0.1, 2)}]).'
                     dif_label.grid(row=2, column=0, sticky='w')
                 elif len(ind_dif) > 1:
                     num_task_list = []
@@ -412,8 +440,25 @@ class TestQualityAssessment(tk.Toplevel):
                         num_task_list.append(str(ind[0]))
                         dif_task_list.append(f'(у {ind[0]} с {ind[1]} на [{round(ind[2] - 0.1, 2)}, {round(ind[2] + 0.1, 2)}])')
                     dif_task_text = '\n'.join(dif_task_list)
-                    dif_label['text'] = f'У шаблонов тестовых заданий {", ".join(num_task_list)} следует изменить сложность \n {dif_task_text}'
+                    dif_label['text'] = f'У шаблонов тестовых заданий {", ".join(num_task_list)} \nследует изменить сложность \n {dif_task_text}.'
                     dif_label.grid(row=2, column=0, sticky='w')
+                
+
+                ind_var = []
+                # Если вариация меньше 0,1, то запоминаем задание
+                for task in tasks:
+                    print(round(df.loc['pjqj', task], 2))
+                    if round(df.loc['pjqj', task], 2) < 0.1:
+                        ind_var.append(task)
+                
+                print(ind_var)
+
+                if len(ind_var) == 1:
+                    variation_label['text'] = f'Вариация (дисперсия) тестовых баллов у шаблона тестового \nзадания {ind_var[0]} слишком мала. Шаблон тестового задания не может \nдифференцировать студентов по их уровню подготовленности.'
+                    variation_label.grid(row=3, column=0, sticky='w')
+                elif len(ind_var) > 1:
+                    variation_label['text'] = f'Вариация (дисперсия) тестовых баллов у шаблонов тестовых \nзаданий {", ".join(ind_var)} слишком мала. Шаблоны тестовых заданий не могут \nдифференцировать студентов по их уровню подготовленности.'
+                    variation_label.grid(row=3, column=0, sticky='w')
 
                 # Итог
                 result_label.grid(row=0, column=0, sticky='w')
@@ -430,7 +475,7 @@ class TestQualityAssessment(tk.Toplevel):
                 print(res_list)    
                 text_result_stud = '\n'.join(res_list)
 
-                # Добавить проверку на задания
+                # Добавить проверку на задания Ri
                 if text_result_stud != '':
                     reconsider_label.grid(row=1, column=0, sticky='w')
                     result_stud_label['text'] = text_result_stud
@@ -438,7 +483,7 @@ class TestQualityAssessment(tk.Toplevel):
                 
                 res_list = []
                 for ind in ind_dif:
-                    res_list.append(f'шаблон тестового задания {ind[0]}')
+                    res_list.append(f'шаблон тестового задания {ind[0]} (изменить сложность)')
 
                 text_result_dif = '\n'.join(res_list)
 
@@ -446,6 +491,22 @@ class TestQualityAssessment(tk.Toplevel):
                     reconsider_label.grid(row=1, column=0, sticky='w')
                     result_dif_label['text'] = text_result_dif
                     result_dif_label.grid(row=3, column=0, sticky='w')
+
+
+                res_list = []
+                for ind in ind_var:
+                    res_list.append(f'шаблон тестового задания {ind} (вариация мала)')
+
+                text_result_var = '\n'.join(res_list)
+
+                if text_result_var != '':
+                    reconsider_label.grid(row=1, column=0, sticky='w')
+                    result_variation_label['text'] = text_result_var
+                    result_variation_label.grid(row=4, column=0, sticky='w')
+
+
+                canvas.update_idletasks() 
+                canvas.configure(scrollregion=canvas.bbox("all"))
 
 
             elif cur_analyze.get() == 'Шаблон тестирования':
