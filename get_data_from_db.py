@@ -62,7 +62,6 @@ def get_groups_ST(id_ST):
     return sorted(list(groups))
 
 # Получение названий групп, которые проходили конкретные ШТ
-# Берутся данные через таблицу testing_session, пока не связаны test и test_template
 def get_groups_SHT(num_SHT):
     groups = set()
 
@@ -135,7 +134,6 @@ def get_marks_groups_one_ST(id_ST, groups):
     return marks
 
 # Получение оценок у групп по одному ШТ
-# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_groups_one_SHT(num_SHT, groups):
     marks = {}
 
@@ -160,7 +158,6 @@ def get_marks_groups_one_SHT(num_SHT, groups):
     return marks
 
 # Получение оценок у годов по одному ШТ
-# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_years_one_SHT(num_SHT, years):
     marks = {}
 
@@ -211,7 +208,6 @@ def get_marks_groups_many_ST(id_ST, groups):
     return marks
 
 # Получение оценок у групп по нескольким ШТ
-# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_groups_many_SHT(num_SHT, groups):
     marks = {}
 
@@ -238,7 +234,6 @@ def get_marks_groups_many_SHT(num_SHT, groups):
     return marks
 
 # Получение оценок у годов по нескольким ШТ
-# Удалено and test.test_template_id = :p_num, пока не связаны test и test_template
 def get_marks_years_many_SHT(num_SHT, years):
     marks = {}
 
