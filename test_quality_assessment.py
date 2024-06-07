@@ -85,13 +85,22 @@ class TestQualityAssessment(tk.Toplevel):
         sorted_table_frame = tk.Frame(frame, bd=10, bg='#FFFFFF')
 
         # Фрэйм для рекомендаций
-        info_frame = tk.Frame(frame, bd=10)
+        info_frame = tk.Frame(frame, bd=10, bg='#FFFFFF')
+
+        good_stud_frame = tk.Frame(info_frame, bd=10)
+        bad_stud_frame = tk.Frame(info_frame, bd=10)
+        good_task_frame = tk.Frame(info_frame, bd=10)
+        bad_task_frame = tk.Frame(info_frame, bd=10)
+        dif_frame = tk.Frame(info_frame, bd=10)
+        variation_frame = tk.Frame(info_frame, bd=10)
 
         # Текст рекомендаций
-        good_stud_label = tk.Label(info_frame, font=custom_font)
-        bad_stud_label = tk.Label(info_frame, font=custom_font)
-        dif_label = tk.Label(info_frame, font=custom_font)
-        variation_label = tk.Label(info_frame, font=custom_font)
+        good_stud_label = tk.Label(good_stud_frame, font=custom_font)
+        bad_stud_label = tk.Label(bad_stud_frame, font=custom_font)
+        good_task_label = tk.Label(good_task_frame, font=custom_font)
+        bad_task_label = tk.Label(bad_task_frame, font=custom_font)
+        dif_label = tk.Label(dif_frame, font=custom_font)
+        variation_label = tk.Label(variation_frame, font=custom_font)
 
         # Фрэйм для итога
         result_frame = tk.Frame(frame, bd=10)
@@ -100,6 +109,7 @@ class TestQualityAssessment(tk.Toplevel):
         result_label = tk.Label(result_frame, text='ИТОГ', font=custom_font)
         reconsider_label = tk.Label(result_frame, text='Следует пересмотреть', font=custom_font)
         result_stud_label = tk.Label(result_frame, font=custom_font)
+        task_stud_label = tk.Label(result_frame, font=custom_font)
         result_dif_label = tk.Label(result_frame, font=custom_font)
         result_variation_label = tk.Label(result_frame, font=custom_font)
 
@@ -136,14 +146,23 @@ class TestQualityAssessment(tk.Toplevel):
             sorted_vert_scrollbar.pack_forget()
             sorted_horiz_scrollbar.pack_forget()
             info_frame.grid_forget()
+            good_stud_frame.grid_forget()
+            bad_stud_frame.grid_forget()
+            good_task_frame.grid_forget()
+            bad_task_frame.grid_forget()
+            dif_frame.grid_forget()
+            variation_frame.grid_forget()
             good_stud_label.grid_forget()
             bad_stud_label.grid_forget()
+            good_task_label.grid_forget()
+            bad_task_label.grid_forget()
             dif_label.grid_forget()
             variation_label.grid_forget()
             result_frame.grid_forget()
             result_label.grid_forget()
             reconsider_label.grid_forget()
             result_stud_label.grid_forget()
+            task_stud_label.grid_forget()
             result_dif_label.grid_forget()
             result_variation_label.grid_forget()
 
@@ -222,6 +241,8 @@ class TestQualityAssessment(tk.Toplevel):
 
                 text_good_stud = ''
                 text_bad_stud = ''
+                text_good_task = ''
+                text_bad_task = ''
 
                 text_result_stud = ''
                 text_result_dif = ''
@@ -243,24 +264,13 @@ class TestQualityAssessment(tk.Toplevel):
                 print(tasks)
                 print(num_stud)
                 
-                # Пока не надо. Считаем, что повторов не может быть
-                # Переименование ШТЗ, если есть повторы
-                # for i in range(len(tasks)):
-                #     last_index = len(tasks) - 1 - list(reversed(tasks)).index(tasks[i])
-                #     if i != last_index:
-                #         new_ind = 1
-                #         for j in range(i, last_index + 1):
-                #             tasks[j] = f'{str(tasks[j])}.{new_ind}'
-                #             new_ind += 1
-                
-                # print(tasks)
                 print(task_difficulty)
 
                 df = pd.DataFrame(data=data, index=tasks)
                 df.loc['Xi'] = (df.sum())
                 df = df.T
-                df.loc['Ri'] = (df.sum())
-                df.loc['Ri', 'Xi'] = np.nan
+                df.loc['Rj'] = (df.sum())
+                df.loc['Rj', 'Xi'] = np.nan
                 print(df)
 
 
@@ -300,81 +310,185 @@ class TestQualityAssessment(tk.Toplevel):
                 tree.pack(side="left", fill="both", expand=True)
                 vert_scrollbar.pack(side="right", fill="y")
                 horiz_scrollbar.pack(side="bottom", fill="x")
-
-                print(df['Xi'])
-                print(df[df['Xi'] >= len(tasks) * 0.8].index)
-                print(df.loc['Ri'][df.loc['Ri'] >= num_stud * 0.8].index)
                 
-                # Пока считать, что выполнили задание отлично = 80%
-                # Рекомендации по студентам, выполнивших все задания
-                ind_good_stud = df[df['Xi'] >= len(tasks) * 0.8].index
-                if len(ind_good_stud) > 1:
-                    text_good_stud = f'Испытуемые {", ".join(ind_good_stud)} успешно выполнили все задания теста. \nТест не дает информации об испытуемых, за исключением того, \nчто для них все задания слишком легкие.'
-                    # Расчёт нового Ri
-                    for ind in ind_good_stud:
-                        row_values = df.loc[ind, :]
-                        df.loc['Ri'] = df.loc['Ri'] - row_values
-                    
-                    # Удаление студентов
-                    df = df.drop(ind_good_stud)
-                    num_stud -= len(ind_good_stud)
-                    
-                elif len(ind_good_stud) == 1:
-                    text_good_stud = f'Испытуемый {ind_good_stud[0]} успешно выполнил все задания теста. \nТест не дает информации об испытуемом, за исключением того, \nчто для него все задания слишком легкие.'
-                    # Расчёт нового Ri
-                    row_values = df.loc[ind_bad_stud[0], :]
-                    df.loc['Ri'] = df.loc['Ri'] - row_values
+                i = num_stud
+                j = len(tasks)
+                ind_good_stud_label = set()
+                ind_bad_stud_label = set()
+                ind_good_task_label = set()
+                ind_bad_task_label = set()
+                for _ in range(i*j):
 
-                    # Удаление студентов
-                    df = df.drop(ind_good_stud)
-                    num_stud -= 1
+                    # Какие студенты выполнили все задания / не выполнили ни одно задание
+                    ind_good_stud = []
+                    ind_bad_stud = []
+                    for index, row in df.iterrows():
+                        good_stud = 0
+                        bad_stud = 0
+                        # Смотрим, как прошёл студент каждое задание
+                        for score in row[:-1]:
+                            if index == 'Rj':
+                                break
+                            
+                            # Если прошёл отлично
+                            if score >= 0.8:
+                                good_stud += 1
+                            # Если не прошёл
+                            elif score < 0.6:
+                                bad_stud += 1
+                        # Если студент прошёл все задания отлично, запоминаем его
+                        if good_stud == len(tasks):
+                            ind_good_stud.append(index)
+                            ind_good_stud_label.add(index)
+                        # Если студент не прошёл ни одно задание, запоминаем его
+                        elif bad_stud == len(tasks):
+                            ind_bad_stud.append(index)
+                            ind_bad_stud_label.add(index)
+                    
+                    # print('good stud ', ind_good_stud)
+                    # print('bad stud ', ind_bad_stud)
+
+
+                    # Студенты, выполнившие все задания
+                    if len(ind_good_stud) >= 1:
+                        # Расчёт нового Rj
+                        for ind in ind_good_stud:
+                            row_values = df.loc[ind, :]
+                            df.loc['Rj'] = df.loc['Rj'] - row_values
+                        
+                        # Удаление студентов
+                        df = df.drop(ind_good_stud)
+                        num_stud -= len(ind_good_stud)
+
+                    # Студенты, не выполнившие ни одно задание
+                    if len(ind_bad_stud) >= 1:
+                        # Расчёт нового Rj
+                        for ind in ind_bad_stud:
+                            row_values = df.loc[ind, :]
+                            df.loc['Rj'] = df.loc['Rj'] - row_values
+
+                        # Удаление студентов
+                        df = df.drop(ind_bad_stud)
+                        num_stud -= len(ind_bad_stud)
+
+                    
+                    # Какие задания выполнили все студенты / не выполнил ни один студент
+                    ind_good_task = []
+                    ind_bad_task = []
+                    for col in df.columns[:-1]:
+                        good_task = 0
+                        bad_task = 0
+                        # Смотрим, как прошёл задание каждый студент
+                        for index, score in df[col].items():
+                            if index == 'Rj':
+                                break
+                            # Если прошёл отлично
+                            if score >= 0.8:
+                                good_task += 1
+                            # Если не прошёл
+                            elif score < 0.6:
+                                bad_task += 1
+                        # Если все студенты прошли задание отлично, запоминаем задание
+                        if good_task == num_stud:
+                            ind_good_task.append(col)
+                            ind_good_task_label.add(str(col))
+                        # Если ни один студент не прошёл задание, запоминаем задание
+                        elif bad_task == num_stud:
+                            ind_bad_task.append(col)
+                            ind_bad_task_label.add(str(col))
+                    
+                    # print('good task ', ind_good_task)
+                    # print('bad task ', ind_bad_task)
+
+                    # Задания, которые выполнили все студенты
+                    if len(ind_good_task) >= 1:
+                        # Расчёт нового Xi
+                        for ind in ind_good_task:
+                            col_values = df.loc[:, ind]
+                            df['Xi'] = df['Xi'] - col_values
+
+                            # Удаление заданий
+                            del df[ind]
+                            tasks.remove(ind)
+                            del task_difficulty[ind]
+                    
+
+                    # Задания, которые не выполнил ни один студент
+                    if len(ind_bad_task) >= 1:
+                        # Расчёт нового Xi
+                        for ind in ind_bad_task:
+                            col_values = df.loc[:, ind]
+                            df['Xi'] = df['Xi'] - col_values
+
+                            # Удаление заданий
+                            del df[ind]
+                            tasks.remove(ind)
+                            del task_difficulty[ind]
+
+
+                # print('ind good stud ', ind_good_stud_label)
+                # print('ind bad stud ', ind_bad_stud_label)
+                # print('ind good task ', ind_good_task_label)
+                # print('ind bad task ', ind_bad_task_label)
+
+
+                # Рекомендации по студентам, выполнивших все задания
+                if len(ind_good_stud_label) > 1:
+                    text_good_stud = f'Испытуемые {", ".join(sorted(list(ind_good_stud_label)))} успешно выполнили все задания теста. \nТест не дает информации об испытуемых, за исключением того, \nчто для них все задания слишком легкие.'
+                    
+                elif len(ind_good_stud_label) == 1:
+                    text_good_stud = f'Испытуемый {list(ind_good_stud_label)[0]} успешно выполнил все задания теста. \nТест не дает информации об испытуемом, за исключением того, \nчто для него все задания слишком легкие.'
                 
                 if text_good_stud != '':
                     good_stud_label['text'] = text_good_stud
+                    good_stud_frame.grid(row=0, column=0, sticky='we', pady=5)
                     good_stud_label.grid(row=0, column=0, sticky='w')
                 
-
                 # Рекомендации по студентам, не выполнивших ни одно задание
-                ind_bad_stud = df[df['Xi'] < len(tasks) * 0.6].index
-                if len(ind_bad_stud) > 1:
-                    text_bad_stud += f'Испытуемые {", ".join(ind_bad_stud)} не прошли ни одно задание теста. \nТест не дает информации об испытуемых, за исключением того, \nчто для них все задания слишком сложные.'
-                    # Расчёт нового Ri
-                    for ind in ind_bad_stud:
-                        row_values = df.loc[ind, :]
-                        df.loc['Ri'] = df.loc['Ri'] - row_values
+                if len(ind_bad_stud_label) > 1:
+                    text_bad_stud += f'Испытуемые {", ".join(sorted(list(ind_bad_stud_label)))} не прошли ни одно задание теста. \nТест не дает информации об испытуемых, за исключением того, \nчто для них все задания слишком сложные.'
 
-                    # Удаление студентов
-                    df = df.drop(ind_bad_stud)
-                    num_stud -= len(ind_bad_stud)
+                elif len(ind_bad_stud_label) == 1:
+                    text_bad_stud += f'Испытуемый {list(ind_bad_stud_label)[0]} не прошёл ни одно задание теста. \nТест не дает информации об испытуемом, за исключением того, \nчто для него все задания слишком сложные.'
 
-                elif len(ind_bad_stud) == 1:
-                    text_bad_stud += f'Испытуемый {ind_bad_stud[0]} не прошёл ни одно задание теста. \nТест не дает информации об испытуемом, за исключением того, \nчто для него все задания слишком сложные.'
-                    # Расчёт нового Ri
-                    row_values = df.loc[ind_bad_stud[0], :]
-                    df.loc['Ri'] = df.loc['Ri'] - row_values
-                    
-                    # Удаление студентов
-                    df = df.drop(ind_bad_stud)
-                    num_stud -= 1
-                    
                 if text_bad_stud != '':
                     bad_stud_label['text'] = text_bad_stud
-                    bad_stud_label.grid(row=1, column=0, sticky='w')
+                    bad_stud_frame.grid(row=1, column=0, sticky='we', pady=5)
+                    bad_stud_label.grid(row=0, column=0, sticky='w')
 
+                # Рекомендации по заданиям, которые выполнили все студенты
+                if len(ind_good_task_label) > 1:
+                    text_good_task = f'Шаблоны тестовых заданий {", ".join(sorted(list(ind_good_task_label)))} успешно выполнили все испытуемые. \nЭти задания не позволяют дифференцировать испытуемых.'
+                    
+                elif len(ind_good_task_label) == 1:
+                    text_good_task = f'Шаблон тестового задания {list(ind_good_task_label)[0]} успешно выполнил все испытуемые. \nЭто задание не позволяет дифференцировать испытуемых.'
                 
-                print(df.loc['Ri'][df.loc['Ri'] >= num_stud * 0.8].index)
+                if text_good_task != '':
+                    good_task_label['text'] = text_good_task
+                    good_task_frame.grid(row=2, column=0, sticky='we', pady=5)
+                    good_task_label.grid(row=0, column=0, sticky='w')
 
+                # Рекомендации по заданиям, которые не выполнил ни один студент
+                if len(ind_bad_task_label) > 1:
+                    text_bad_task += f'Шаблоны тестовых заданий {", ".join(sorted(list(ind_bad_task_label)))} не прошли ни один испытуемый. \nЭти задания не позволяют дифференцировать испытуемых.'
 
+                elif len(ind_bad_task_label) == 1:
+                    text_bad_task += f'Шаблон тестового задания {list(ind_bad_task_label)[0]} не прошёл ни один испытуемый. \nЭто задание не позволяет дифференцировать испытуемых.'
+                    
+                if text_bad_task != '':
+                    bad_task_label['text'] = text_bad_task
+                    bad_task_frame.grid(row=3, column=0, sticky='we', pady=5)
+                    bad_task_label.grid(row=0, column=0, sticky='w')
 
 
                 # Вычитание и деление на кол-во студентов
-                df.loc['Wj'] = (num_stud - df.loc['Ri'])
-                df.loc['pj'] = (df.loc['Ri'] / num_stud)
+                df.loc['Wj'] = (num_stud - df.loc['Rj'])
+                df.loc['pj'] = (df.loc['Rj'] / num_stud)
                 df.loc['qj'] = (1 - df.loc['pj'])
                 df.loc['pjqj'] = (df.loc['pj'] * df.loc['qj'])
 
-                # Сортировка столбцов по убыванию значений в строке Ri
-                df = df.sort_values('Ri', axis=1, ascending=False)
+                # Сортировка столбцов по убыванию значений в строке Rj
+                df = df.sort_values('Rj', axis=1, ascending=False)
                 # Сортировка строк по убыванию значений в столбце Xi
                 df = df.sort_values('Xi', ascending=False)
 
@@ -420,19 +534,20 @@ class TestQualityAssessment(tk.Toplevel):
                 sorted_horiz_scrollbar.pack(side="bottom", fill="x")
 
 
-                print(task_difficulty)
+                # print(task_difficulty)
                 ind_dif = []
                 # Если сложность задания не соответсвует действительности, то запоминаем задание
                 for task in task_difficulty:
-                    print(round(df.loc['qj', task], 2))
+                    # print(round(df.loc['qj', task], 2))
                     if round(df.loc['qj', task], 2) > task_difficulty[task] + 0.1 or round(df.loc['qj', task], 2) < task_difficulty[task] - 0.1:
                         ind_dif.append(tuple([task, task_difficulty[task], round(df.loc['qj', task], 2)]))
                     
-                print(ind_dif)
+                # print(ind_dif)
 
                 if len(ind_dif) == 1:
                     dif_label['text'] = f'У шаблона тестового задания {ind_dif[0][0]} \nследует изменить сложность (с {ind_dif[0][1]} на [{round(ind_dif[0][2] - 0.1, 2)}, {round(ind_dif[0][2] + 0.1, 2)}]).'
-                    dif_label.grid(row=2, column=0, sticky='w')
+                    dif_frame.grid(row=4, column=0, sticky='we', pady=5)
+                    dif_label.grid(row=0, column=0, sticky='w')
                 elif len(ind_dif) > 1:
                     num_task_list = []
                     dif_task_list = []
@@ -440,47 +555,62 @@ class TestQualityAssessment(tk.Toplevel):
                         num_task_list.append(str(ind[0]))
                         dif_task_list.append(f'(у {ind[0]} с {ind[1]} на [{round(ind[2] - 0.1, 2)}, {round(ind[2] + 0.1, 2)}])')
                     dif_task_text = '\n'.join(dif_task_list)
-                    dif_label['text'] = f'У шаблонов тестовых заданий {", ".join(num_task_list)} \nследует изменить сложность \n {dif_task_text}.'
-                    dif_label.grid(row=2, column=0, sticky='w')
+                    dif_label['text'] = f'У шаблонов тестовых заданий {", ".join(num_task_list)} следует изменить сложность \n {dif_task_text}.'
+                    dif_frame.grid(row=4, column=0, sticky='we', pady=5)
+                    dif_label.grid(row=0, column=0, sticky='w')
                 
 
                 ind_var = []
                 # Если вариация меньше 0,1, то запоминаем задание
                 for task in tasks:
-                    print(round(df.loc['pjqj', task], 2))
+                    # print(round(df.loc['pjqj', task], 2))
                     if round(df.loc['pjqj', task], 2) < 0.1:
-                        ind_var.append(task)
+                        ind_var.append(str(task))
                 
-                print(ind_var)
+                # print(ind_var)
 
                 if len(ind_var) == 1:
                     variation_label['text'] = f'Вариация (дисперсия) тестовых баллов у шаблона тестового \nзадания {ind_var[0]} слишком мала. Шаблон тестового задания не может \nдифференцировать студентов по их уровню подготовленности.'
-                    variation_label.grid(row=3, column=0, sticky='w')
+                    variation_frame.grid(row=5, column=0, sticky='we', pady=5)
+                    variation_label.grid(row=0, column=0, sticky='w')
                 elif len(ind_var) > 1:
                     variation_label['text'] = f'Вариация (дисперсия) тестовых баллов у шаблонов тестовых \nзаданий {", ".join(ind_var)} слишком мала. Шаблоны тестовых заданий не могут \nдифференцировать студентов по их уровню подготовленности.'
-                    variation_label.grid(row=3, column=0, sticky='w')
+                    variation_frame.grid(row=5, column=0, sticky='we', pady=5)
+                    variation_label.grid(row=0, column=0, sticky='w')
 
                 # Итог
                 result_label.grid(row=0, column=0, sticky='w')
 
                 res_list = []
-                for ind in ind_good_stud:
+                for ind in list(ind_good_stud_label):
                     stud = get_stud(ind)
                     res_list.append(f'испытуемого {ind} {stud[0][0]} {stud[0][1]} ({stud[0][2]})')
-                for ind in ind_bad_stud:
+                for ind in list(ind_bad_stud_label):
                     stud = get_stud(ind)
                     res_list.append(f'испытуемого {ind} {stud[0][0]} {stud[0][1]} ({stud[0][2]})')
                 
-                
-                print(res_list)    
                 text_result_stud = '\n'.join(res_list)
 
-                # Добавить проверку на задания Ri
                 if text_result_stud != '':
                     reconsider_label.grid(row=1, column=0, sticky='w')
                     result_stud_label['text'] = text_result_stud
                     result_stud_label.grid(row=2, column=0, sticky='w')
+
+
+                res_list = []
+                for ind in sorted(list(ind_good_task_label)):
+                    res_list.append(f'шаблон тестового задания {ind} (все испытуемые прошли)')
+                for ind in sorted(list(ind_bad_task_label)):
+                    res_list.append(f'шаблон тестового задания {ind} (ни один из испытуемых прошёл)')
+                 
+                text_result_task = '\n'.join(res_list)
+
+                if text_result_task != '':
+                    reconsider_label.grid(row=1, column=0, sticky='w')
+                    task_stud_label['text'] = text_result_task
+                    task_stud_label.grid(row=3, column=0, sticky='w')
                 
+
                 res_list = []
                 for ind in ind_dif:
                     res_list.append(f'шаблон тестового задания {ind[0]} (изменить сложность)')
@@ -490,7 +620,7 @@ class TestQualityAssessment(tk.Toplevel):
                 if text_result_dif != '':
                     reconsider_label.grid(row=1, column=0, sticky='w')
                     result_dif_label['text'] = text_result_dif
-                    result_dif_label.grid(row=3, column=0, sticky='w')
+                    result_dif_label.grid(row=4, column=0, sticky='w')
 
 
                 res_list = []
@@ -502,7 +632,9 @@ class TestQualityAssessment(tk.Toplevel):
                 if text_result_var != '':
                     reconsider_label.grid(row=1, column=0, sticky='w')
                     result_variation_label['text'] = text_result_var
-                    result_variation_label.grid(row=4, column=0, sticky='w')
+                    result_variation_label.grid(row=5, column=0, sticky='w')
+
+                
 
 
                 canvas.update_idletasks() 
