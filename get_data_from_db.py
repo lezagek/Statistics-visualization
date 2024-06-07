@@ -281,7 +281,6 @@ def get_marks_ST(id_ST):
     cursor.execute(query, {'p_id': id_ST})
 
     marks = cursor.fetchall()
-    print(marks)
     
     conn.commit()
     conn.close()
@@ -301,7 +300,6 @@ def get_stud(id_stud):
     cursor.execute(query, {'p_id': id_stud})
 
     stud = cursor.fetchall()
-    print(stud)
     
     conn.commit()
     conn.close()
