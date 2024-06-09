@@ -106,7 +106,7 @@ class TestQualityAssessment(tk.Toplevel):
 
         # Фрэйм для рекомендаций по корреляциям
         corr_info_frame = tk.Frame(corr_frame, bd=10, bg='#FFFFFF')
-        
+
         big_koef_frame = tk.Frame(corr_info_frame, bd=10)
         small_koef_frame = tk.Frame(corr_info_frame, bd=10)
 
@@ -150,7 +150,7 @@ class TestQualityAssessment(tk.Toplevel):
         help_label = tk.Label(help_frame, bg='#FFFFFF')
         help_label.image = help_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         help_label.configure(image=help_photo)
-        help_label.grid(row=0, column=0, sticky='w')
+        # help_label.grid(row=0, column=0, sticky='w')
 
         def reset_number_to_analyze():
             number_to_analyze_ST_label.grid_forget()
@@ -161,6 +161,7 @@ class TestQualityAssessment(tk.Toplevel):
             cur_number_analyze.set('')
 
         def reset_all():
+            help_label.grid_forget()
             stud_task_frame.grid_forget()
             corr_frame.grid_forget()
             table_frame.grid_forget()
@@ -259,20 +260,52 @@ class TestQualityAssessment(tk.Toplevel):
         number_analyze_combobox.bind('<<ComboboxSelected>>', bind_number_to_analyze)
 
 
+        # Вычисление коэффициента корреляции Пирсона
+        def calculate_pirson(new_df, df, x, i, j, num_stud):
+            sumxy = 0
+            sumx = 0
+            sumy = 0
+            for index, row in new_df.iterrows():
+                sumxy += round(row[x] * row.iloc[j], 4)
+                # Суммируются возведённые в квадрат баллы за тестовое задание
+                sumx += round(row[x] ** 2, 4)
+                sumy += round(row.iloc[j] ** 2, 4)
+
+            # Получение вариации тестовых заданий
+            pjx = df.iloc[df.index.get_loc('pj'), i]
+            pjy = df.iloc[df.index.get_loc('pj'), j]
+
+            # Вычисление числителя
+            numerator  = round(sumxy - (num_stud * pjx * pjy), 4)
+
+            # Вычисление выражения под корнем
+            sqrtx = round((sumx - (num_stud * (pjx ** 2))), 4)
+            sqrty = round((sumy - (num_stud * (pjy ** 2))), 4)
+
+            # Вычисление знаменателя
+            denominator = round(np.sqrt(sqrtx * sqrty), 4)
+
+            # Вычисление коэффициента корреляции Пирсона
+            pirs = round(numerator  / denominator, 4)
+
+            return pirs
+
         def analyze():
-            stud_task_frame.grid(row=1, column=0, sticky='wen')
-            corr_frame.grid(row=2, column=0, sticky='wen')
-
-            table_frame.grid(row=1, column=0, sticky='wen')
-            sorted_table_frame.grid(row=2, column=0, sticky='wen')
-            info_frame.grid(row=1, rowspan=2, column=1, sticky='wen', padx=10, pady=10)
-            
-            correlation_table_frame.grid(row=1, column=0, sticky='wen')
-            corr_info_frame.grid(row=1, column=1, sticky='wen')
-            
-            result_frame.grid(row=3, column=0, sticky='wesn', padx=10, pady=10)
-
             if cur_analyze.get() == 'Сеанс тестирования':
+                stud_task_frame.grid(row=1, column=0, sticky='wen')
+                corr_frame.grid(row=2, column=0, sticky='wen')
+
+                table_frame.grid(row=1, column=0, sticky='wen')
+                sorted_table_frame.grid(row=2, column=0, sticky='wen')
+                info_frame.grid(row=1, rowspan=2, column=1, sticky='wen', padx=10, pady=10)
+                
+                correlation_table_frame.grid(row=1, column=0, sticky='wen')
+                corr_info_frame.grid(row=1, column=1, sticky='wen')
+                
+                result_frame.grid(row=3, column=0, sticky='wesn', padx=10, pady=10)
+
+                help_label.grid(row=0, column=0, sticky='w')
+
                 ST_id = cur_number_analyze.get()
                 ST_id = ST_id[ST_id.find('(') + 1 : ST_id.find(')')]
                 marks = get_marks_ST(ST_id)
@@ -624,43 +657,14 @@ class TestQualityAssessment(tk.Toplevel):
 
                 print(new_df)
 
-                # Вычисление коэффициента корреляции Пирсона
-                def calculate_pirson(new_df, df, x, i, j):
-                    sumxy = 0
-                    sumx = 0
-                    sumy = 0
-                    for index, row in new_df.iterrows():
-                        sumxy += round(row[x] * row.iloc[j], 4)
-                        # Суммируются возведённые в квадрат баллы за тестовое задание
-                        sumx += round(row[x] ** 2, 4)
-                        sumy += round(row.iloc[j] ** 2, 4)
-
-                    # Получение вариации тестовых заданий
-                    pjx = df.iloc[df.index.get_loc('pj'), i]
-                    pjy = df.iloc[df.index.get_loc('pj'), j]
-
-                    # Вычисление числителя
-                    numerator  = round(sumxy - (num_stud * pjx * pjy), 4)
-
-                    # Вычисление выражения под корнем
-                    sqrtx = round((sumx - (num_stud * (pjx ** 2))), 4)
-                    sqrty = round((sumy - (num_stud * (pjy ** 2))), 4)
-
-                    # Вычисление знаменателя
-                    denominator = round(np.sqrt(sqrtx * sqrty), 4)
-
-                    # Вычисление коэффициента корреляции Пирсона
-                    pirs = round(numerator  / denominator, 4)
-
-                    return pirs
-                    
+                # Вычисление коэффициента корреляции Пирсона для каждого задания
                 for i, x in enumerate(tasks):
                     new_data[x][i] = 1
                     for j in range(i+1, len(tasks)):
-                        new_data[x][j] = calculate_pirson(new_df, df, x, i, j)
+                        new_data[x][j] = calculate_pirson(new_df, df, x, i, j, num_stud)
                     
                     for j in range(i):
-                        new_data[x][j] = calculate_pirson(new_df, df, x, i, j)
+                        new_data[x][j] = calculate_pirson(new_df, df, x, i, j, num_stud)
 
                 print(new_data)
 
@@ -836,7 +840,207 @@ class TestQualityAssessment(tk.Toplevel):
 
 
             elif cur_analyze.get() == 'Шаблон тестирования':
-                pass
+                corr_frame.grid(row=0, column=0, sticky='wen')
+                correlation_table_frame.grid(row=0, column=0, sticky='wen')
+                corr_info_frame.grid(row=0, column=1, sticky='wen')
+                
+                result_frame.grid(row=1, column=0, sticky='wesn', padx=10, pady=10)
+
+                SHT_id = cur_number_analyze.get()
+                marks = get_marks_SHT(SHT_id)
+                data = {}
+                tasks = []
+                ind = ''
+                first_id = marks[0][0]
+                num_stud = 0
+
+                text_result_big_koef = ''
+                text_result_small_koef = ''
+
+                for mark in marks:
+                    if mark[0] != ind:
+                        data[mark[0]] = []
+                        ind = mark[0]
+                        num_stud += 1
+                        
+                    data[mark[0]].append(round(mark[1], 2))
+                    if ind == first_id:
+                        tasks.append(mark[2])
+                
+
+                print(data)
+                print(tasks)
+                print(num_stud)
+                
+
+                df = pd.DataFrame(data=data, index=tasks)
+                df.loc['Xi'] = (df.sum())
+                df = df.T
+                df.loc['Rj'] = (df.sum())
+                df.loc['Rj', 'Xi'] = np.nan
+                print(df)
+
+                # Вычитание и деление на кол-во студентов
+                df.loc['Wj'] = (num_stud - df.loc['Rj'])
+                df.loc['pj'] = (df.loc['Rj'] / num_stud)
+                df.loc['qj'] = (1 - df.loc['pj'])
+                df.loc['pjqj'] = (df.loc['pj'] * df.loc['qj'])
+
+                # Сортировка столбцов по убыванию значений в строке Rj
+                df = df.sort_values('Rj', axis=1, ascending=False)
+                # Сортировка строк по убыванию значений в столбце Xi
+                df = df.sort_values('Xi', ascending=False)
+
+                df = df.fillna('')
+                print(df)
+
+
+                # Корреляционная таблица
+                tasks = df.columns[:-1]
+                print(tasks)
+
+                new_data = {}
+
+                for i in tasks:
+                    new_data[i] = [0 for _ in tasks]
+                print(new_data)
+
+                # Получаем список всех столбцов, кроме последнего
+                cols = df.columns[:-1].tolist()
+
+                # Создаем новый DataFrame, используя эти столбцы
+                new_df = df.loc[~df.index.isin(['Rj', 'Wj', 'pj', 'qj', 'pjqj']), cols]
+
+                print(new_df)
+
+                # Вычисление коэффициента корреляции Пирсона для каждого задания
+                for i, x in enumerate(tasks):
+                    new_data[x][i] = 1
+                    for j in range(i+1, len(tasks)):
+                        new_data[x][j] = calculate_pirson(new_df, df, x, i, j, num_stud)
+                    
+                    for j in range(i):
+                        new_data[x][j] = calculate_pirson(new_df, df, x, i, j, num_stud)
+
+                print(new_data)
+
+                pirs_df = pd.DataFrame(data=new_data, index=tasks)
+                print(pirs_df)
+
+
+                # Создание таблицы
+                for item in correlation_tree.get_children():
+                    correlation_tree.delete(item)
+                correlation_tree['columns'] = tuple(pirs_df.columns)
+
+                # Вертикальный скролл
+                correlation_vert_scrollbar.pack(side="right", fill="y")
+                correlation_tree.configure(yscrollcommand=correlation_vert_scrollbar.set)
+
+                # Горизонтальный скролл
+                correlation_horiz_scrollbar.pack(side="bottom", fill="x")
+                correlation_tree.configure(xscrollcommand=correlation_horiz_scrollbar.set)
+
+                # Добавление заголовков столбцов
+                correlation_tree.column('#0', anchor='c')
+                for col in pirs_df.columns:
+                    correlation_tree.column(col, anchor='e')
+                correlation_tree.heading('#0', text='')
+                for col in pirs_df.columns:
+                    correlation_tree.heading(col, text=col)
+
+                # Заполнение таблицы данными из DataFrame с округлением
+                for index, row in pirs_df.fillna('').iterrows():
+                    values = []
+                    for value in row:
+                        if isinstance(value, (int, float)):
+                            value = round(value, 3)
+                            values.append(str(value))
+                        else:
+                            values.append(str(value))
+                    correlation_tree.insert('', 'end', text=str(index), values=tuple(values))
+
+                # Размещение таблицы и скроллбаров в окне
+                correlation_tree.pack(side="left", fill="both", expand=True)
+                correlation_vert_scrollbar.pack(side="right", fill="y")
+                correlation_horiz_scrollbar.pack(side="bottom", fill="x")
+                
+
+                # Перебор коэффициентов корреляции
+                big_koef = []
+                small_koef = {}
+                for i, row in pirs_df.iterrows():
+                    small_koef[i] = 0
+                    for j, koef in row.items():
+                        if i != j and koef > 0.3 and sorted([i, j]) not in big_koef:
+                            big_koef.append(sorted([i, j]))
+                        elif koef < 0:
+                            small_koef[i] += 1
+
+                # Рекомендации по ШТЗ, у которых корреляция слишком высокая
+                if len(big_koef) == 1:
+                    big_koef_label['text'] = f'Корреляция заданий {big_koef[0][0]} и {big_koef[0][1]} слишком высокая (> 0.3), задания дублируют друг друга.'
+                    big_koef_frame.grid(row=0, column=0, sticky='we', pady=5)
+                    big_koef_label.grid(row=0, column=0, sticky='w')
+                elif len(big_koef) > 1:
+                    big_koef_text = []
+                    for pair in big_koef:
+                        pair_str = [str(task) for task in pair]
+                        big_koef_text.append(" и ".join(pair_str))
+
+                    big_koef_label['text'] = f'Корреляция заданий \n {", ".join(big_koef_text)} \n слишком высокая (> 0.3), задания дублируют друг друга.'
+                    big_koef_frame.grid(row=0, column=0, sticky='we', pady=5)
+                    big_koef_label.grid(row=0, column=0, sticky='w')
+
+                # Если у задания отрицательная корреляция с большим кол-вом других заданий, то запоминаем его
+                small_koef_list = []
+                for task in small_koef:
+                    if small_koef[task] >= len(tasks) / 2:
+                        small_koef_list.append(str(task))
+                
+                # Рекомендации по ШТЗ, у которых отрицательная корреляция
+                if len(small_koef_list) == 1:
+                    small_koef_label['text'] = f'Шаблон тестового задания {small_koef_list[0]} отрицательно коррелирует с большим \nколичеством других заданий. Это означает, что исход ответов на него \nпротивоположен результатам по другим заданиям. По всей вероятности, \nу такого задания имеются грубые ошибки в содержании и (или) оформлении.'
+                    small_koef_frame.grid(row=1, column=0, sticky='we', pady=5)
+                    small_koef_label.grid(row=0, column=0, sticky='w')
+                    
+                elif len(small_koef_list) > 1:
+                    small_koef_label['text'] = f'Шаблоны тестовых заданий {", ".join(small_koef_list)} отрицательно коррелируют с большим \nколичеством других заданий. Это означает, что исход ответов на них \nпротивоположен результатам по другим заданиям. По всей вероятности, \nу таких заданий имеются грубые ошибки в содержании и (или) оформлении.'
+                    small_koef_frame.grid(row=1, column=0, sticky='we', pady=5)
+                    small_koef_label.grid(row=0, column=0, sticky='w')
+                
+
+                # Итог
+                result_label.grid(row=0, column=0, sticky='w')
+
+                res_list = []
+                for ind in big_koef:
+                    res_list.append(f'шаблоны тестовых заданий {ind[0]} и {ind[1]} (корреляция > 0.3)')
+
+                text_result_big_koef = '\n'.join(res_list)
+
+                if text_result_big_koef != '':
+                    reconsider_label.grid(row=1, column=0, sticky='w')
+                    result_big_koef_label['text'] = text_result_big_koef
+                    result_big_koef_label.grid(row=2, column=0, sticky='w')
+                
+
+                res_list = []
+                for ind in small_koef_list:
+                    res_list.append(f'шаблон тестового задания {ind} (отрицательная корреляция)')
+
+                text_result_small_koef = '\n'.join(res_list)
+
+                if result_small_koef_label != '':
+                    reconsider_label.grid(row=1, column=0, sticky='w')
+                    result_small_koef_label['text'] = text_result_small_koef
+                    result_small_koef_label.grid(row=3, column=0, sticky='w')
+
+
+                canvas.update_idletasks() 
+                canvas.configure(scrollregion=canvas.bbox("all"))
+
+
 
 
         # Загрузка изображения и присвоение к analyze_label
