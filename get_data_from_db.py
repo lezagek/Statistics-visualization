@@ -3,7 +3,7 @@ import sqlite3
 # Получение всех СТ
 def get_ST():
     ST = []
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     query = '''SELECT testing_session_name, testing_session_id
@@ -21,7 +21,7 @@ def get_ST():
 # Получение всех ШТ
 def get_SHT():
     SHT = []
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     query = '''SELECT test_template_id 
@@ -40,7 +40,7 @@ def get_SHT():
 def get_groups_ST(id_ST):
     groups = set()
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for ST in id_ST:
@@ -65,7 +65,7 @@ def get_groups_ST(id_ST):
 def get_groups_SHT(num_SHT):
     groups = set()
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for SHT in num_SHT:
@@ -90,7 +90,7 @@ def get_groups_SHT(num_SHT):
 def get_years_SHT(num_SHT):
     years = set()
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for SHT in num_SHT:
@@ -113,7 +113,7 @@ def get_years_SHT(num_SHT):
 def get_marks_groups_one_ST(id_ST, groups):
     marks = {}
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for group in groups:
@@ -137,7 +137,7 @@ def get_marks_groups_one_ST(id_ST, groups):
 def get_marks_groups_one_SHT(num_SHT, groups):
     marks = {}
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for group in groups:
@@ -161,7 +161,7 @@ def get_marks_groups_one_SHT(num_SHT, groups):
 def get_marks_years_one_SHT(num_SHT, years):
     marks = {}
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for year in years:
@@ -185,7 +185,7 @@ def get_marks_years_one_SHT(num_SHT, years):
 def get_marks_groups_many_ST(id_ST, groups):
     marks = {}
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for id in id_ST:
@@ -211,7 +211,7 @@ def get_marks_groups_many_ST(id_ST, groups):
 def get_marks_groups_many_SHT(num_SHT, groups):
     marks = {}
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for num in num_SHT:
@@ -237,7 +237,7 @@ def get_marks_groups_many_SHT(num_SHT, groups):
 def get_marks_years_many_SHT(num_SHT, years):
     marks = {}
 
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     for num in num_SHT:
@@ -262,7 +262,7 @@ def get_marks_years_many_SHT(num_SHT, years):
 
 # Получение оценок за ШТЗ в СТ (анализ качества)
 def get_marks_ST(id_ST):
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     query = '''SELECT student_id, task_score, task_template_id, task_template_difficulty
@@ -284,7 +284,7 @@ def get_marks_ST(id_ST):
 
 # Получение данных студентов по их id (анализ качества)
 def get_stud(id_stud):
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     query = '''SELECT student_name, group_name, subgroup_num
@@ -303,7 +303,7 @@ def get_stud(id_stud):
 
 # Получение оценок за ШТЗ в ШТ (анализ качества)
 def get_marks_SHT(id_SHT):
-    conn = sqlite3.connect('db.sqlite')
+    conn = sqlite3.connect('idraw.sqlite')
     cursor = conn.cursor()
 
     query = '''SELECT student_id, task_score, task_template_id
