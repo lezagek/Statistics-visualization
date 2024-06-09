@@ -141,8 +141,8 @@ class TestQualityAssessment(tk.Toplevel):
         sorted_vert_scrollbar = ttk.Scrollbar(sorted_table_frame, orient="vertical", command=sorted_tree.yview)
         sorted_horiz_scrollbar = ttk.Scrollbar(sorted_table_frame, orient="horizontal", command=sorted_tree.xview)
         correlation_tree = ttk.Treeview(correlation_table_frame)
-        correlation_vert_scrollbar = ttk.Scrollbar(correlation_table_frame, orient="vertical", command=sorted_tree.yview)
-        correlation_horiz_scrollbar = ttk.Scrollbar(correlation_table_frame, orient="horizontal", command=sorted_tree.xview)
+        correlation_vert_scrollbar = ttk.Scrollbar(correlation_table_frame, orient="vertical", command=correlation_tree.yview)
+        correlation_horiz_scrollbar = ttk.Scrollbar(correlation_table_frame, orient="horizontal", command=correlation_tree.xview)
         
 
         # Загрузка изображения и присвоение к help_label
@@ -150,7 +150,6 @@ class TestQualityAssessment(tk.Toplevel):
         help_label = tk.Label(help_frame, bg='#FFFFFF')
         help_label.image = help_photo  # Сохраняем ссылку на изображение, чтобы оно не удалилось из памяти
         help_label.configure(image=help_photo)
-        # help_label.grid(row=0, column=0, sticky='w')
 
         def reset_number_to_analyze():
             number_to_analyze_ST_label.grid_forget()
@@ -286,7 +285,7 @@ class TestQualityAssessment(tk.Toplevel):
             denominator = round(np.sqrt(sqrtx * sqrty), 4)
 
             # Вычисление коэффициента корреляции Пирсона
-            pirs = round(numerator  / denominator, 4)
+            pirs = round(numerator / denominator, 4)
 
             return pirs
 
@@ -731,8 +730,9 @@ class TestQualityAssessment(tk.Toplevel):
                     for pair in big_koef:
                         pair_str = [str(task) for task in pair]
                         big_koef_text.append(" и ".join(pair_str))
+                    big_koef_text = "\n".join(big_koef_text)
 
-                    big_koef_label['text'] = f'Корреляция заданий \n {", ".join(big_koef_text)} \n слишком высокая (> 0.3), задания дублируют друг друга.'
+                    big_koef_label['text'] = f'Корреляция заданий \n {big_koef_text} \n слишком высокая (> 0.3), задания дублируют друг друга.'
                     big_koef_frame.grid(row=6, column=0, sticky='we', pady=5)
                     big_koef_label.grid(row=0, column=0, sticky='w')
 
@@ -987,8 +987,9 @@ class TestQualityAssessment(tk.Toplevel):
                     for pair in big_koef:
                         pair_str = [str(task) for task in pair]
                         big_koef_text.append(" и ".join(pair_str))
-
-                    big_koef_label['text'] = f'Корреляция заданий \n {", ".join(big_koef_text)} \n слишком высокая (> 0.3), задания дублируют друг друга.'
+                    big_koef_text = "\n".join(big_koef_text)
+                    
+                    big_koef_label['text'] = f'Корреляция заданий \n {big_koef_text} \n слишком высокая (> 0.3), задания дублируют друг друга.'
                     big_koef_frame.grid(row=0, column=0, sticky='we', pady=5)
                     big_koef_label.grid(row=0, column=0, sticky='w')
 
