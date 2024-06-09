@@ -300,3 +300,29 @@ def get_stud(id_stud):
     conn.close()
 
     return stud
+
+# Получение оценок за ШТЗ в ШТ (анализ качества)
+def get_marks_SHT(id_SHT):
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+
+    query = '''SELECT student_id, task_score, task_template_id
+                FROM testing_session
+                LEFT JOIN test USING (testing_session_id)
+                LEFT JOIN ' task' USING (test_id)
+                LEFT JOIN student USING (student_id)
+                WHERE testing_session_id = (
+                    SELECT testing_session_id
+                    FROM testing_session
+                    WHERE testing_session.test_template_id = :p_id
+                    ORDER BY testing_session_date DESC, testing_session_begin_time DESC, testing_session_end_time DESC, testing_session_id
+                    LIMIT 1
+                )'''
+    cursor.execute(query, {'p_id': id_SHT})
+
+    marks = cursor.fetchall()
+    
+    conn.commit()
+    conn.close()
+
+    return marks
